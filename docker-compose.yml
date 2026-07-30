@@ -1,0 +1,113 @@
+# ============================================================
+# Live Memories – Docker Compose
+# ============================================================
+# Default profile: SQLite (no external DB needed)
+# PostgreSQL profile: docker compose --profile postgres up
+# ============================================================
+name: live-memories
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: live-memories-backend:dev
+    container_name: lm-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./data/live_memories.db
+      - STORAGE_BACKEND=local
+      - LOCAL_STORAGE_PATH=./data/uploads
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_data:/app/data
+    networks:
+      - lm-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: live-memories-frontend:dev
+    container_name: lm-frontend
+    restart: unless-stopped
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api/v1
+    ports:
+      - "80:80"
+    networks:
+      - lm-network
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # ── PostgreSQL profile ────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: lm-postgres
+    profiles: ["postgres"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: live_memories
+      POSTGRES_USER: live_memories
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_local}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lm-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U live_memories"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend-pg:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: live-memories-backend:dev
+    container_name: lm-backend-pg
+    profiles: ["postgres"]
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://live_memories:${POSTGRES_PASSWORD:-change_me_local}@postgres:5432/live_memories
+      - STORAGE_BACKEND=local
+      - LOCAL_STORAGE_PATH=./data/uploads
+    ports:
+      - "8001:8000"
+    volumes:
+      - backend_data:/app/data
+    networks:
+      - lm-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  backend_data:
+    driver: local
+  postgres_data:
+    driver: local
+
+networks:
+  lm-network:
+    driver: bridge

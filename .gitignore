@@ -1,0 +1,85 @@
+# ============================================================
+# Live Memories – .gitignore
+# ============================================================
+
+# ----- Python --------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+ENV/
+.env.local
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.ruff_cache/
+
+# ----- Node / Frontend ----------------------------------------
+node_modules/
+dist/
+.parcel-cache/
+*.tsbuildinfo
+.vite/
+coverage/
+playwright-report/
+playwright/.cache/
+test-results/
+
+# ----- Environment --------------------------------------------
+.env
+.env.*
+!.env.example
+
+# ----- Docker -------------------------------------------------
+*.override.yml
+docker-compose.override.yml
+
+# ----- Databases ----------------------------------------------
+*.db
+*.sqlite
+*.sqlite3
+backend/data/
+
+# ----- Uploads ------------------------------------------------
+backend/uploads/
+data/uploads/
+
+# ----- Editors ------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ----- Terraform ----------------------------------------------
+infrastructure/terraform/.terraform/
+infrastructure/terraform/*.tfstate
+infrastructure/terraform/*.tfstate.*
+infrastructure/terraform/*.tfvars
+!infrastructure/terraform/*.tfvars.example
+infrastructure/terraform/.terraform.lock.hcl
+
+# ----- Logs ---------------------------------------------------
+*.log
+logs/
+
+# ----- Secrets -----------------------------------------------
+*.pem
+*.key
+*.crt
+secrets/

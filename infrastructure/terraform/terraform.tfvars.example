@@ -1,0 +1,15 @@
+# Copy this file to terraform.tfvars and fill in the values.
+# NEVER commit terraform.tfvars to version control.
+
+project_id = "your-gcp-project-id"
+region     = "europe-west1"
+environment = "production"
+
+# Docker images (update after building and pushing)
+backend_image  = "europe-west1-docker.pkg.dev/your-gcp-project-id/live-memories/backend:latest"
+frontend_image = "europe-west1-docker.pkg.dev/your-gcp-project-id/live-memories/frontend:latest"
+
+# Cloud SQL
+db_instance_tier = "db-f1-micro"
+db_name          = "live_memories"
+db_user          = "live_memories"

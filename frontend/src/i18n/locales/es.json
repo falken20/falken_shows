@@ -1,0 +1,50 @@
+{
+  "app": {
+    "name": "Live Memories"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "export": "Exportar",
+    "import": "Importar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "yes": "Sí",
+    "no": "No",
+    "noResults": "No hay resultados",
+    "required": "Este campo es obligatorio"
+  },
+  "home": {
+    "tagline": "Tu inventario personal de conciertos en directo",
+    "apiStatus": {
+      "label": "Estado de la API",
+      "title": "Estado del servidor",
+      "status": "Estado",
+      "environment": "Entorno",
+      "error": "No se puede conectar con el servidor. ¿Está el backend en marcha?"
+    }
+  },
+  "theme": {
+    "switchToDark": "Cambiar a modo oscuro",
+    "switchToLight": "Cambiar a modo claro"
+  },
+  "errors": {
+    "notFound": {
+      "title": "Página no encontrada",
+      "message": "La página que buscas no existe o ha sido movida.",
+      "backHome": "Volver al inicio"
+    },
+    "generic": "Ha ocurrido un error inesperado",
+    "network": "Error de conexión con el servidor"
+  }
+}

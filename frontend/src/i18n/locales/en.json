@@ -1,0 +1,50 @@
+{
+  "app": {
+    "name": "Live Memories"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "export": "Export",
+    "import": "Import",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "yes": "Yes",
+    "no": "No",
+    "noResults": "No results found",
+    "required": "This field is required"
+  },
+  "home": {
+    "tagline": "Your personal live concert inventory",
+    "apiStatus": {
+      "label": "API Status",
+      "title": "Server status",
+      "status": "Status",
+      "environment": "Environment",
+      "error": "Cannot connect to the server. Is the backend running?"
+    }
+  },
+  "theme": {
+    "switchToDark": "Switch to dark mode",
+    "switchToLight": "Switch to light mode"
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "message": "The page you are looking for does not exist or has been moved.",
+      "backHome": "Back to home"
+    },
+    "generic": "An unexpected error occurred",
+    "network": "Connection error with the server"
+  }
+}
