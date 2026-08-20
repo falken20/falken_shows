@@ -43,7 +43,12 @@ export function TopBar() {
         >
           {t('app.name')}
         </Typography>
-        <Button component={RouterLink} to="/concerts" color="inherit" aria-label={t('concerts.nav')}>
+        <Button
+          component={RouterLink}
+          to="/concerts"
+          color="inherit"
+          aria-label={t('concerts.nav')}
+        >
           {t('concerts.nav')}
         </Button>
         <IconButton

@@ -94,7 +94,9 @@ export default function ConcertsPage() {
                   key={concert.id}
                   hover
                   sx={{ cursor: 'pointer' }}
-                  onClick={() => { void navigate(`/concerts/${concert.id}`) }}
+                  onClick={() => {
+                    void navigate(`/concerts/${concert.id}`)
+                  }}
                   tabIndex={0}
                   onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ' ') void navigate(`/concerts/${concert.id}`)
@@ -103,11 +105,18 @@ export default function ConcertsPage() {
                 >
                   <TableCell>{concert.title}</TableCell>
                   <TableCell>{concert.artist?.name ?? '—'}</TableCell>
-                  <TableCell>{concert.venue ? `${concert.venue.name}, ${concert.venue.city}` : '—'}</TableCell>
+                  <TableCell>
+                    {concert.venue ? `${concert.venue.name}, ${concert.venue.city}` : '—'}
+                  </TableCell>
                   <TableCell>{concert.date}</TableCell>
                   <TableCell>
                     {concert.rating !== null ? (
-                      <Rating value={concert.rating} readOnly size="small" aria-label={`${concert.rating}/5`} />
+                      <Rating
+                        value={concert.rating}
+                        readOnly
+                        size="small"
+                        aria-label={`${concert.rating}/5`}
+                      />
                     ) : (
                       '—'
                     )}
@@ -118,7 +127,13 @@ export default function ConcertsPage() {
           </Table>
 
           {/* Pagination */}
-          <Stack direction="row" alignItems="center" justifyContent="center" spacing={2} sx={{ py: 2 }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="center"
+            spacing={2}
+            sx={{ py: 2 }}
+          >
             <Button
               disabled={page <= 1}
               onClick={() => setPage(p => p - 1)}

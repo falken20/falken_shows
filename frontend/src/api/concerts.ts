@@ -91,7 +91,9 @@ export const venuesApi = {
 export const concertsApi = {
   getAll: (page = 1, pageSize = 20): Promise<PaginatedResponse<ConcertResponse>> =>
     apiClient
-      .get<PaginatedResponse<ConcertResponse>>('/concerts', { params: { page, page_size: pageSize } })
+      .get<PaginatedResponse<ConcertResponse>>('/concerts', {
+        params: { page, page_size: pageSize },
+      })
       .then(r => r.data),
 
   getById: (id: number): Promise<ConcertResponse> =>

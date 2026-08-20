@@ -136,7 +136,9 @@ export default function ConcertFormPage() {
       {/* Back */}
       <Button
         startIcon={<ArrowBackIcon aria-hidden="true" />}
-        onClick={() => { void navigate(isEditing ? `/concerts/${numericId}` : '/concerts') }}
+        onClick={() => {
+          void navigate(isEditing ? `/concerts/${numericId}` : '/concerts')
+        }}
         sx={{ mb: 2 }}
         aria-label={t('common.back')}
       >
@@ -157,7 +159,9 @@ export default function ConcertFormPage() {
         <Box
           component="form"
           noValidate
-          onSubmit={e => { void handleSubmit(onSubmit)(e) }}
+          onSubmit={e => {
+            void handleSubmit(onSubmit)(e)
+          }}
           aria-label={isEditing ? t('concerts.form.editTitle') : t('concerts.form.createTitle')}
         >
           <Stack spacing={2}>
@@ -210,7 +214,9 @@ export default function ConcertFormPage() {
                   label={t('concerts.form.artist')}
                   fullWidth
                   value={field.value ?? ''}
-                  onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
+                  onChange={e =>
+                    field.onChange(e.target.value === '' ? null : Number(e.target.value))
+                  }
                 >
                   <MenuItem value="">—</MenuItem>
                   {artistsData?.items.map(a => (
@@ -233,7 +239,9 @@ export default function ConcertFormPage() {
                   label={t('concerts.form.venue')}
                   fullWidth
                   value={field.value ?? ''}
-                  onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
+                  onChange={e =>
+                    field.onChange(e.target.value === '' ? null : Number(e.target.value))
+                  }
                 >
                   <MenuItem value="">—</MenuItem>
                   {venuesData?.items.map(v => (
@@ -256,7 +264,9 @@ export default function ConcertFormPage() {
                   label={t('concerts.form.rating')}
                   fullWidth
                   value={field.value ?? ''}
-                  onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
+                  onChange={e =>
+                    field.onChange(e.target.value === '' ? null : Number(e.target.value))
+                  }
                 >
                   <MenuItem value="">—</MenuItem>
                   {[1, 2, 3, 4, 5].map(n => (
@@ -280,7 +290,9 @@ export default function ConcertFormPage() {
                     fullWidth
                     type="number"
                     value={field.value ?? ''}
-                    onChange={e => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
+                    onChange={e =>
+                      field.onChange(e.target.value === '' ? null : Number(e.target.value))
+                    }
                     inputProps={{ min: 0, step: 0.01 }}
                   />
                 )}
@@ -318,7 +330,9 @@ export default function ConcertFormPage() {
             {/* Submit */}
             <Stack direction="row" spacing={2} justifyContent="flex-end">
               <Button
-                onClick={() => { void navigate(isEditing ? `/concerts/${numericId}` : '/concerts') }}
+                onClick={() => {
+                  void navigate(isEditing ? `/concerts/${numericId}` : '/concerts')
+                }}
                 aria-label={t('common.cancel')}
               >
                 {t('common.cancel')}
@@ -342,4 +356,3 @@ export default function ConcertFormPage() {
     </Box>
   )
 }
-

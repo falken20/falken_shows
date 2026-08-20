@@ -34,9 +34,7 @@ apiClient.interceptors.response.use(
   response => response,
   (error: AxiosError<ApiErrorResponse>) => {
     const message =
-      error.response?.data?.error?.message ??
-      error.message ??
-      'An unexpected error occurred'
+      error.response?.data?.error?.message ?? error.message ?? 'An unexpected error occurred'
     return Promise.reject(new Error(message))
-  },
+  }
 )

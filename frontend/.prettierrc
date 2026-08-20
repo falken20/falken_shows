@@ -5,8 +5,5 @@
   "trailingComma": "es5",
   "printWidth": 100,
   "arrowParens": "avoid",
-  "endOfLine": "lf",
-  "importOrder": ["^react", "^@?\\w", "^@/", "^\\."],
-  "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true
+  "endOfLine": "lf"
 }

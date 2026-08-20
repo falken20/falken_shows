@@ -39,9 +39,7 @@ export function ThemeModeProvider({ children }: { children: React.ReactNode }) {
   const toggleMode = () => setMode(prev => (prev === 'light' ? 'dark' : 'light'))
 
   return (
-    <ThemeModeContext.Provider value={{ mode, toggleMode }}>
-      {children}
-    </ThemeModeContext.Provider>
+    <ThemeModeContext.Provider value={{ mode, toggleMode }}>{children}</ThemeModeContext.Provider>
   )
 }
 

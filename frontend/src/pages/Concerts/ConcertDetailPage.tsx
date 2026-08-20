@@ -69,7 +69,9 @@ export default function ConcertDetailPage() {
       {/* Back navigation */}
       <Button
         startIcon={<ArrowBackIcon aria-hidden="true" />}
-        onClick={() => { void navigate('/concerts') }}
+        onClick={() => {
+          void navigate('/concerts')
+        }}
         sx={{ mb: 2 }}
         aria-label={t('common.back')}
       >
@@ -87,7 +89,9 @@ export default function ConcertDetailPage() {
               <Button
                 variant="outlined"
                 startIcon={<EditIcon aria-hidden="true" />}
-                onClick={() => { void navigate(`/concerts/${concert.id}/edit`) }}
+                onClick={() => {
+                  void navigate(`/concerts/${concert.id}/edit`)
+                }}
                 aria-label={t('common.edit')}
               >
                 {t('common.edit')}
@@ -122,9 +126,7 @@ export default function ConcertDetailPage() {
                 {t('concerts.form.artist')}
               </Typography>
               <Typography variant="body1">{concert.artist.name}</Typography>
-              {concert.artist.country && (
-                <Chip label={concert.artist.country} size="small" />
-              )}
+              {concert.artist.country && <Chip label={concert.artist.country} size="small" />}
             </Stack>
           )}
 
@@ -212,7 +214,9 @@ export default function ConcertDetailPage() {
           <Button
             color="error"
             variant="contained"
-            onClick={() => { handleDelete() }}
+            onClick={() => {
+              handleDelete()
+            }}
             disabled={deleteMutation.isPending}
             aria-label={t('common.delete')}
           >
