@@ -256,6 +256,8 @@ Con el backend en marcha:
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 - **OpenAPI JSON**: http://localhost:8000/openapi.json
+- **Referencia completa de la API**: [docs/API.md](docs/API.md)
+- **Arquitectura del sistema (diagramas)**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ### Endpoints principales
 
