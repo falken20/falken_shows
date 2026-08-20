@@ -72,7 +72,7 @@ resource "google_sql_database_instance" "main" {
     ip_configuration {
       ipv4_enabled    = false
       private_network = var.vpc_network_id
-      require_ssl     = true
+      ssl_mode        = "ENCRYPTED_ONLY"
     }
   }
 

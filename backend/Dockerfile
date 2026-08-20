@@ -8,10 +8,10 @@ FROM python:3.12-slim AS builder
 WORKDIR /build
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:0.4.4 /uv /usr/local/bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /usr/local/bin/uv
 
 # Copy dependency files
-COPY pyproject.toml .
+COPY pyproject.toml uv.lock .
 
 # Install dependencies into a virtual environment
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
