@@ -23,11 +23,11 @@ function createTestQueryClient() {
   })
 }
 
-// eslint-disable-next-line react-refresh/only-export-components -- test utility: provider and helpers co-located intentionally
 /**
  * Wraps the component under test with the same providers used in production:
  * TanStack Query, MUI ThemeProvider (light mode), and BrowserRouter.
  */
+// eslint-disable-next-line react-refresh/only-export-components -- test utility: provider and helpers co-located intentionally
 function AppProviders({ children }: { children: ReactNode }) {
   const queryClient = createTestQueryClient()
   const theme = createAppTheme('light')

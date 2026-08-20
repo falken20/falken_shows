@@ -45,12 +45,12 @@ export function ThemeModeProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components -- provider and hook intentionally co-located
 /**
  * Consume the current theme mode and toggle function.
  *
  * Must be used inside a {@link ThemeModeProvider}.
  */
+// eslint-disable-next-line react-refresh/only-export-components -- provider and hook intentionally co-located
 export function useThemeMode() {
   return useContext(ThemeModeContext)
 }
