@@ -5,6 +5,7 @@ const STORAGE_KEY = 'live-memories-theme-mode'
 
 interface ThemeModeContextValue {
   mode: PaletteMode
+  /** Toggle between `'light'` and `'dark'` mode and persist to localStorage. */
   toggleMode: () => void
 }
 
@@ -13,6 +14,17 @@ const ThemeModeContext = createContext<ThemeModeContextValue>({
   toggleMode: () => undefined,
 })
 
+/**
+ * Context provider for light/dark theme mode.
+ *
+ * Initialisation priority:
+ * 1. Value stored in `localStorage` under {@link STORAGE_KEY}.
+ * 2. OS-level `prefers-color-scheme` media query.
+ * 3. Default: `'light'`.
+ *
+ * Place this provider high in the tree (e.g. wrapping `<App>` in `main.tsx`)
+ * so that `useThemeMode` is available everywhere.
+ */
 export function ThemeModeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<PaletteMode>(() => {
     const stored = localStorage.getItem(STORAGE_KEY)
@@ -34,6 +46,11 @@ export function ThemeModeProvider({ children }: { children: React.ReactNode }) {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components -- provider and hook intentionally co-located
+/**
+ * Consume the current theme mode and toggle function.
+ *
+ * Must be used inside a {@link ThemeModeProvider}.
+ */
 export function useThemeMode() {
   return useContext(ThemeModeContext)
 }

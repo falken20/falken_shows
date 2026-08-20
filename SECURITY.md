@@ -4,7 +4,7 @@
 
 If you discover a security vulnerability in Live Memories, **please do not open a public GitHub issue**.
 
-Instead, report it privately by emailing: **[YOUR SECURITY EMAIL]**
+Instead, report it privately by emailing: **security@livememories.app**
 
 Include in your report:
 

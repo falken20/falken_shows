@@ -400,6 +400,6 @@ Este proyecto está bajo la licencia [MIT](LICENSE).
 
 ## Autoría
 
-Creado por **[YOUR NAME]** – [YOUR EMAIL]
+Creado por **falken20** – security@livememories.app
 
 > Hecho con ❤️ para nunca olvidar ningún concierto.

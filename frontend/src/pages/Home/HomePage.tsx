@@ -8,6 +8,16 @@ import MusicNoteIcon from '@mui/icons-material/MusicNote'
 import { useTranslation } from 'react-i18next'
 import { useHealth } from '@/hooks/useHealth'
 
+/**
+ * Landing page displayed at `/`.
+ *
+ * Shows a hero section with the app name and tagline, followed by a status
+ * card that polls `GET /api/v1/health` via {@link useHealth} and displays:
+ * - A loading spinner while the request is in flight.
+ * - An error alert if the backend is unreachable.
+ * - The API status chip (`ok` / `degraded`), app version, and environment
+ *   once the response arrives.
+ */
 export default function HomePage() {
   const { t } = useTranslation()
   const { data, isLoading, isError } = useHealth()

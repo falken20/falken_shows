@@ -70,7 +70,9 @@ resource "google_sql_database_instance" "main" {
     }
 
     ip_configuration {
-      ipv4_enabled = true
+      ipv4_enabled    = false
+      private_network = var.vpc_network_id
+      require_ssl     = true
     }
   }
 
@@ -100,16 +102,10 @@ resource "google_project_iam_member" "backend_cloudsql" {
 }
 
 # ── Secret Manager ────────────────────────────────────────────
-data "google_secret_manager_secret_version" "jwt_secret" {
-  project = var.project_id
-  secret  = "live-memories-jwt-secret"
-  version = "latest"
-}
-
 data "google_secret_manager_secret_version" "db_password" {
   project = var.project_id
   secret  = "live-memories-db-password"
-  version = "latest"
+  version = var.db_password_secret_version
 }
 
 # Grant backend SA access to secrets
@@ -123,6 +119,13 @@ resource "google_secret_manager_secret_iam_member" "backend_jwt" {
 resource "google_secret_manager_secret_iam_member" "backend_db_password" {
   project   = var.project_id
   secret_id = "live-memories-db-password"
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.backend.email}"
+}
+
+resource "google_secret_manager_secret_iam_member" "backend_admin_password" {
+  project   = var.project_id
+  secret_id = "live-memories-admin-password"
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.backend.email}"
 }
@@ -178,7 +181,17 @@ resource "google_cloud_run_v2_service" "backend" {
 
       env {
         name  = "DATABASE_URL"
-        value = "postgresql+psycopg2://${var.db_user}:${data.google_secret_manager_secret_version.db_password.secret_data}@/${var.db_name}?host=/cloudsql/${google_sql_database_instance.main.connection_name}"
+        value = "postgresql+psycopg2://${var.db_user}@/${var.db_name}?host=/cloudsql/${google_sql_database_instance.main.connection_name}"
+      }
+
+      env {
+        name = "DB_PASSWORD"
+        value_source {
+          secret_key_ref {
+            secret  = "live-memories-db-password"
+            version = var.db_password_secret_version
+          }
+        }
       }
 
       env {
@@ -186,7 +199,17 @@ resource "google_cloud_run_v2_service" "backend" {
         value_source {
           secret_key_ref {
             secret  = "live-memories-jwt-secret"
-            version = "latest"
+            version = var.jwt_secret_version
+          }
+        }
+      }
+
+      env {
+        name = "ADMIN_PASSWORD"
+        value_source {
+          secret_key_ref {
+            secret  = "live-memories-admin-password"
+            version = var.admin_password_secret_version
           }
         }
       }
@@ -247,13 +270,13 @@ resource "google_cloud_run_v2_service" "backend" {
   depends_on = [google_project_service.apis]
 }
 
-# Allow public access to backend
-resource "google_cloud_run_v2_service_iam_member" "backend_public" {
+# Backend requires authentication – invoked only via frontend proxy or authenticated clients
+resource "google_cloud_run_v2_service_iam_member" "backend_invoker" {
   project  = var.project_id
   location = var.region
   name     = google_cloud_run_v2_service.backend.name
   role     = "roles/run.invoker"
-  member   = "allUsers"
+  member   = "serviceAccount:${google_service_account.frontend.email}"
 }
 
 # ── Cloud Run – Frontend ──────────────────────────────────────

@@ -1,4 +1,5 @@
 import AppBar from '@mui/material/AppBar'
+import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
@@ -9,6 +10,18 @@ import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useThemeMode } from '@/hooks/useThemeMode'
 
+/**
+ * Sticky application header displayed on every page inside {@link MainLayout}.
+ *
+ * Contains:
+ * - App logo and title (links to `/`).
+ * - Light/dark mode toggle button (persisted to `localStorage` via
+ *   {@link useThemeMode}). The button label is localised and toggled
+ *   between `theme.switchToLight` and `theme.switchToDark`.
+ *
+ * Accessibility: decorative icons have `aria-hidden="true"` so screen
+ * readers focus on the meaningful button label.
+ */
 export function TopBar() {
   const { t } = useTranslation()
   const { mode, toggleMode } = useThemeMode()
@@ -30,6 +43,9 @@ export function TopBar() {
         >
           {t('app.name')}
         </Typography>
+        <Button component={RouterLink} to="/concerts" color="inherit" aria-label={t('concerts.nav')}>
+          {t('concerts.nav')}
+        </Button>
         <IconButton
           color="inherit"
           onClick={toggleMode}

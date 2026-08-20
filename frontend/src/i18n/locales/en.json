@@ -19,6 +19,7 @@
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
+    "page": "Page",
     "yes": "Yes",
     "no": "No",
     "noResults": "No results found",
@@ -46,5 +47,26 @@
     },
     "generic": "An unexpected error occurred",
     "network": "Connection error with the server"
+  },
+  "concerts": {
+    "title": "Concerts",
+    "nav": "Concerts",
+    "empty": "No concerts recorded yet. Add the first one!",
+    "addNew": "Add concert",
+    "form": {
+      "title": "Title",
+      "date": "Date",
+      "artist": "Artist",
+      "venue": "Venue",
+      "rating": "Rating",
+      "notes": "Notes",
+      "ticketPrice": "Ticket price",
+      "currency": "Currency",
+      "createTitle": "New concert",
+      "editTitle": "Edit concert"
+    },
+    "detail": {
+      "deleteConfirm": "Delete this concert? This action cannot be undone."
+    }
   }
 }

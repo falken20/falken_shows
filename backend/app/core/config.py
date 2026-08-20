@@ -8,6 +8,18 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Application-wide configuration loaded from environment variables and .env files.
+
+    All settings can be overridden via environment variables (case-sensitive).
+    Production deployments must supply strong secrets via Google Secret Manager
+    (see infrastructure/terraform/main.tf for secret_key_ref bindings).
+
+    Security invariants enforced at startup:
+        - CORS_ORIGINS may not be empty or contain ``'*'``.
+        - In production, JWT_SECRET_KEY must be ≥32 chars and not start with ``change-me``.
+        - In production, ADMIN_PASSWORD must be ≥12 chars and not start with ``change-me``.
+        - ACCESS_TOKEN_EXPIRE_MINUTES must be in the range [1, 1440].
+    """
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -62,6 +74,7 @@ class Settings(BaseSettings):
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def parse_cors_origins(cls, value: str | list[str]) -> list[str]:
+        """Accept CORS_ORIGINS as a comma-separated string or a JSON list."""
         if isinstance(value, str):
             return [origin.strip() for origin in value.split(",") if origin.strip()]
         return [origin.strip() for origin in value if origin.strip()]
@@ -69,6 +82,7 @@ class Settings(BaseSettings):
     @field_validator("ACCESS_TOKEN_EXPIRE_MINUTES")
     @classmethod
     def validate_access_token_expiry(cls, value: int) -> int:
+        """Enforce a sensible token lifetime: between 1 minute and 24 hours."""
         if value <= 0:
             raise ValueError("ACCESS_TOKEN_EXPIRE_MINUTES must be greater than 0")
         if value > 24 * 60:
@@ -77,6 +91,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_security_settings(self) -> "Settings":
+        """Cross-field security validation executed after all fields are populated."""
         if not self.CORS_ORIGINS:
             raise ValueError("CORS_ORIGINS must include at least one origin")
         if "*" in self.CORS_ORIGINS:
@@ -96,15 +111,18 @@ class Settings(BaseSettings):
 
     @property
     def allowed_image_types_list(self) -> list[str]:
+        """ALLOWED_IMAGE_TYPES parsed into a list of MIME-type strings."""
         return [t.strip() for t in self.ALLOWED_IMAGE_TYPES.split(",") if t.strip()]
 
     @property
     def max_upload_size_bytes(self) -> int:
+        """MAX_UPLOAD_SIZE_MB converted to bytes."""
         return self.MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
 
 @lru_cache
 def get_settings() -> Settings:
+    """Return the singleton Settings instance (result is cached by lru_cache)."""
     return Settings()
 
 

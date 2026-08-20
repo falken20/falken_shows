@@ -19,8 +19,6 @@ steps:
       - build
       - -t
       - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/backend:${SHORT_SHA}"
-      - -t
-      - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/backend:latest"
       - ./backend
     waitFor: [backend-test]
 
@@ -31,8 +29,6 @@ steps:
       - build
       - -t
       - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/frontend:${SHORT_SHA}"
-      - -t
-      - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/frontend:latest"
       - --build-arg
       - "VITE_API_BASE_URL=${_BACKEND_URL}/api/v1"
       - ./frontend
@@ -42,8 +38,7 @@ steps:
     id: push-backend
     args:
       - push
-      - --all-tags
-      - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/backend"
+      - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/backend:${SHORT_SHA}"
     waitFor: [build-backend]
 
   # ── Push frontend image ───────────────────────────────────────
@@ -51,8 +46,7 @@ steps:
     id: push-frontend
     args:
       - push
-      - --all-tags
-      - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/frontend"
+      - "${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/frontend:${SHORT_SHA}"
     waitFor: [build-frontend]
 
   # ── Run Alembic migrations ────────────────────────────────────

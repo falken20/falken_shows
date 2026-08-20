@@ -19,7 +19,7 @@ help: ## Show this help message
 install: install-backend install-frontend ## Install all dependencies
 
 install-backend: ## Install Python dependencies
-	cd $(BACKEND_DIR) && $(UV) sync --all-extras
+	cd $(BACKEND_DIR) && $(UV) sync --dev --all-extras
 
 install-frontend: ## Install Node dependencies
 	cd $(FRONTEND_DIR) && npm ci
@@ -39,7 +39,7 @@ dev-frontend: ## Start frontend dev server
 test: test-backend test-frontend ## Run all tests
 
 test-backend: ## Run backend tests with coverage
-	cd $(BACKEND_DIR) && $(UV) run pytest --cov=app --cov-report=term-missing \
+	cd $(BACKEND_DIR) && $(UV) run python -m pytest --cov=app --cov-report=term-missing \
 	  --cov-report=html:htmlcov --cov-fail-under=80 -v
 
 test-frontend: ## Run frontend unit/integration tests

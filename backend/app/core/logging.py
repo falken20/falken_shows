@@ -7,6 +7,20 @@ from app.core.config import settings
 
 
 def configure_logging() -> None:
+    """Configure the root logger for the application.
+
+    In **production** (``APP_ENV=production``) every log line is emitted as a
+    single-line JSON object compatible with Google Cloud Logging structured logs::
+
+        {"timestamp": "...", "level": "INFO", "logger": "app.main", "message": "..."}
+
+    In **development / testing** a human-readable format is used::
+
+        2026-01-01 12:00:00 [INFO] app.main: startup ...
+
+    Noisy third-party loggers (SQLAlchemy, Uvicorn access) are silenced to
+    WARNING so they don't drown out application logs.
+    """
     log_level = getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO)
 
     formatter: logging.Formatter

@@ -53,3 +53,26 @@ variable "db_user" {
   type        = string
   default     = "live_memories"
 }
+
+variable "vpc_network_id" {
+  description = "VPC network self_link for Cloud SQL private IP"
+  type        = string
+}
+
+variable "jwt_secret_version" {
+  description = "Secret Manager version for JWT secret"
+  type        = string
+  default     = "latest"
+}
+
+variable "db_password_secret_version" {
+  description = "Secret Manager version for DB password"
+  type        = string
+  default     = "latest"
+}
+
+variable "admin_password_secret_version" {
+  description = "Secret Manager version for admin password"
+  type        = string
+  default     = "latest"
+}

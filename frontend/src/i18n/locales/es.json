@@ -19,6 +19,7 @@
     "back": "Volver",
     "next": "Siguiente",
     "previous": "Anterior",
+    "page": "Página",
     "yes": "Sí",
     "no": "No",
     "noResults": "No hay resultados",
@@ -46,5 +47,26 @@
     },
     "generic": "Ha ocurrido un error inesperado",
     "network": "Error de conexión con el servidor"
+  },
+  "concerts": {
+    "title": "Conciertos",
+    "nav": "Conciertos",
+    "empty": "No hay conciertos registrados. ¡Añade el primero!",
+    "addNew": "Añadir concierto",
+    "form": {
+      "title": "Título",
+      "date": "Fecha",
+      "artist": "Artista",
+      "venue": "Lugar",
+      "rating": "Valoración",
+      "notes": "Notas",
+      "ticketPrice": "Precio entrada",
+      "currency": "Moneda",
+      "createTitle": "Nuevo concierto",
+      "editTitle": "Editar concierto"
+    },
+    "detail": {
+      "deleteConfirm": "¿Eliminar este concierto? Esta acción no se puede deshacer."
+    }
   }
 }

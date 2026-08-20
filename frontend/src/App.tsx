@@ -9,6 +9,14 @@ import { createAppTheme } from '@/utils/theme'
 import AppRouter from '@/router/AppRouter'
 import { LoadingFallback } from '@/components/common/LoadingFallback'
 
+/**
+ * Global TanStack Query client.
+ *
+ * - `staleTime: 5 min` – avoids refetching data that is unlikely to change
+ *   between navigations.
+ * - `retry: 1` – retries failed requests once before surfacing the error,
+ *   reducing noise from transient network issues.
+ */
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -18,6 +26,13 @@ const queryClient = new QueryClient({
   },
 })
 
+/**
+ * Inner component that reads the current theme mode and wraps the router.
+ *
+ * Separated from `App` so that `ThemeProvider` can consume `useThemeMode`
+ * which requires `ThemeModeProvider` to be in the tree. `ThemeModeProvider`
+ * is rendered by `main.tsx`, wrapping the entire `<App>`.
+ */
 function ThemedApp() {
   const { mode } = useThemeMode()
   const theme = createAppTheme(mode)
@@ -34,6 +49,13 @@ function ThemedApp() {
   )
 }
 
+/**
+ * Application root component.
+ *
+ * Provides the global `QueryClientProvider` and renders `ThemedApp`.
+ * `ReactQueryDevtools` is included unconditionally but only renders in
+ * development builds.
+ */
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>

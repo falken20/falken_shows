@@ -3,6 +3,13 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import { useTranslation } from 'react-i18next'
 
+/**
+ * Full-viewport loading indicator shown while lazy-loaded pages are fetching.
+ *
+ * Used as the `fallback` prop of `<Suspense>` in {@link App}. The outer `Box`
+ * carries `role="status"` and a localised `aria-label` so screen readers
+ * announce the loading state.
+ */
 export function LoadingFallback() {
   const { t } = useTranslation()
 

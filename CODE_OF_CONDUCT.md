@@ -22,6 +22,6 @@ Examples of unacceptable behavior:
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project maintainer at **[YOUR EMAIL]**.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project maintainer at **security@livememories.app**.
 
 This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org), version 2.1.

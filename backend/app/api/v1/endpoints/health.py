@@ -4,7 +4,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import text
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.db.session import get_db
@@ -20,6 +20,11 @@ router = APIRouter()
     description="Returns a 200 response if the service is running.",
 )
 async def health_check() -> HealthResponse:
+    """Lightweight liveness probe for load balancers and uptime monitors.
+
+    Does **not** check database connectivity – use ``/ready`` for that.
+    Safe to call at high frequency; no I/O is performed.
+    """
     return HealthResponse(
         status="ok",
         app_name=settings.APP_NAME,
@@ -35,10 +40,16 @@ async def health_check() -> HealthResponse:
     description="Returns 200 if the service is ready to serve requests (DB connection OK).",
 )
 async def readiness_check(
-    db: Annotated[Session, Depends(get_db)],
+    db: Annotated[AsyncSession, Depends(get_db)],
 ) -> ReadinessResponse:
+    """Readiness probe used by Cloud Run and Kubernetes to gate traffic.
+
+    Executes a trivial ``SELECT 1`` against the database to verify that the
+    connection pool is healthy.  Returns ``status=degraded`` instead of
+    raising an HTTP 500 so the orchestrator receives a parseable response.
+    """
     try:
-        db.execute(text("SELECT 1"))
+        await db.execute(text("SELECT 1"))
         db_status = "ok"
     except Exception:
         db_status = "error"
