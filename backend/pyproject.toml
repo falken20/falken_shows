@@ -41,6 +41,7 @@ addopts = "-v --tb=short"
 [tool.coverage.run]
 source = ["app"]
 omit = ["tests/*", "alembic/*", "scripts/*"]
+concurrency = ["greenlet", "thread"]
 
 [tool.coverage.report]
 exclude_lines = [

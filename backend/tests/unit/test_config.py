@@ -47,6 +47,16 @@ def test_access_token_expiry_must_be_positive() -> None:
         Settings(ACCESS_TOKEN_EXPIRE_MINUTES=0)
 
 
+def test_access_token_expiry_must_not_exceed_max() -> None:
+    with pytest.raises(ValidationError):
+        Settings(ACCESS_TOKEN_EXPIRE_MINUTES=24 * 60 + 1)
+
+
+def test_cors_origins_must_not_be_empty() -> None:
+    with pytest.raises(ValidationError):
+        Settings(CORS_ORIGINS=[])
+
+
 def test_production_requires_strong_jwt_secret() -> None:
     with pytest.raises(ValidationError):
         Settings(APP_ENV="production", JWT_SECRET_KEY="change-me")
@@ -55,3 +65,12 @@ def test_production_requires_strong_jwt_secret() -> None:
 def test_production_requires_strong_admin_password() -> None:
     with pytest.raises(ValidationError):
         Settings(APP_ENV="production", ADMIN_PASSWORD="change-me")
+
+
+def test_production_requires_strong_admin_password_when_jwt_is_strong() -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            APP_ENV="production",
+            JWT_SECRET_KEY="a-very-strong-secret-key-longer-than-32-chars",
+            ADMIN_PASSWORD="change-me",
+        )

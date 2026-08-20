@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from httpx import AsyncClient
+
 
 class TestProductionDocsDisabled:
     """Verify that OpenAPI docs are disabled in production mode."""
@@ -69,3 +71,50 @@ class TestAsyncDatabaseSession:
         from app.db.session import async_engine
 
         assert isinstance(async_engine, AsyncEngine)
+
+
+class TestGetCurrentUser:
+    """Verify the get_current_user JWT dependency rejects bad tokens."""
+
+    async def test_rejects_malformed_token(self, async_client: AsyncClient) -> None:
+        response = await async_client.post(
+            "/api/v1/artists",
+            json={"name": "Should Not Be Created"},
+            headers={"Authorization": "Bearer not-a-valid-jwt"},
+        )
+        assert response.status_code == 401
+
+    async def test_rejects_missing_token(self, async_client: AsyncClient) -> None:
+        response = await async_client.post("/api/v1/artists", json={"name": "Should Not Be Created"})
+        assert response.status_code == 401
+
+    async def test_rejects_token_without_sub_claim(self, async_client: AsyncClient) -> None:
+        from app.core.security import create_access_token
+
+        token = create_access_token({"foo": "bar"})
+        response = await async_client.post(
+            "/api/v1/artists",
+            json={"name": "Should Not Be Created"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == 401
+
+
+class TestAuthenticate:
+    """Verify the authenticate() service rejects invalid admin credentials."""
+
+    async def test_rejects_wrong_email(self, async_client: AsyncClient) -> None:
+        response = await async_client.post(
+            "/api/v1/auth/token",
+            data={"username": "not-admin@example.com", "password": "change-me-in-production"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == 401
+
+    async def test_rejects_wrong_password(self, async_client: AsyncClient) -> None:
+        response = await async_client.post(
+            "/api/v1/auth/token",
+            data={"username": "admin@example.com", "password": "wrong-password"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == 401
