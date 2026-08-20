@@ -3,7 +3,7 @@
 # ============================================================
 
 # ── Stage 1: Builder ──────────────────────────────────────────
-FROM python:3.12-slim AS builder
+FROM python:3.14-slim AS builder
 
 WORKDIR /build
 
@@ -18,7 +18,7 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 RUN uv sync --frozen --no-dev --no-editable
 
 # ── Stage 2: Runtime ──────────────────────────────────────────
-FROM python:3.12-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 # Create non-root user
 RUN groupadd --gid 1001 appgroup && \
