@@ -12,6 +12,7 @@ class ErrorCode(StrEnum):
     Values are intentionally uppercase strings so they can be matched by clients
     without coupling to HTTP status codes.
     """
+
     INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR"
     NOT_FOUND = "NOT_FOUND"
     CONCERT_NOT_FOUND = "CONCERT_NOT_FOUND"
@@ -42,6 +43,7 @@ class AppError(Exception):
         details: Optional key-value pairs for machine-readable context
             (e.g. field names, resource IDs).
     """
+
     def __init__(
         self,
         code: ErrorCode,

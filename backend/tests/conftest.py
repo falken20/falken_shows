@@ -1,4 +1,5 @@
 """Shared pytest fixtures for Live Memories backend tests."""
+
 from __future__ import annotations
 
 from collections.abc import AsyncGenerator

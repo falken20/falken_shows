@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, JSON, Numeric, String, Text, func
+from sqlalchemy import JSON, DateTime, ForeignKey, Integer, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -17,9 +17,7 @@ class Artist(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     bio: Mapped[str | None] = mapped_column(Text, nullable=True)
     country: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     concerts: Mapped[list[Concert]] = relationship("Concert", back_populates="artist")
 
@@ -34,9 +32,7 @@ class Venue(Base):
     city: Mapped[str] = mapped_column(String(100), nullable=False)
     country: Mapped[str] = mapped_column(String(100), nullable=False)
     capacity: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     concerts: Mapped[list[Concert]] = relationship("Concert", back_populates="venue")
 
@@ -60,9 +56,7 @@ class Concert(Base):
     rating: Mapped[int | None] = mapped_column(Integer, nullable=True)
     ticket_price: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="EUR", server_default="EUR")
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -72,9 +66,7 @@ class Concert(Base):
 
     artist: Mapped[Artist | None] = relationship("Artist", back_populates="concerts")
     venue: Mapped[Venue | None] = relationship("Venue", back_populates="concerts")
-    photos: Mapped[list[Photo]] = relationship(
-        "Photo", back_populates="concert", cascade="all, delete-orphan"
-    )
+    photos: Mapped[list[Photo]] = relationship("Photo", back_populates="concert", cascade="all, delete-orphan")
 
 
 class Photo(Base):
@@ -88,8 +80,6 @@ class Photo(Base):
     )
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
     storage_url: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     concert: Mapped[Concert] = relationship("Concert", back_populates="photos")

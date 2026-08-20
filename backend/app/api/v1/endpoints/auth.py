@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter
-from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
-from fastapi import Depends
+
+from fastapi import APIRouter, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.schemas.auth import TokenResponse
 from app.services import auth_service

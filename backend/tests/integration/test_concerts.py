@@ -1,4 +1,5 @@
 """Integration tests for the /api/v1/concerts endpoints."""
+
 from __future__ import annotations
 
 import pytest

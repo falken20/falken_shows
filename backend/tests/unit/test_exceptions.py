@@ -1,4 +1,5 @@
 """Unit tests for the AppError exception and ErrorCode."""
+
 from __future__ import annotations
 
 from app.core.exceptions import AppError, ErrorCode

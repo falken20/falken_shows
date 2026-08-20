@@ -16,6 +16,7 @@ class HealthResponse(BaseModel):
         version: Semantic version string from ``Settings.APP_VERSION``.
         environment: Active deployment environment (development / testing / production).
     """
+
     status: Literal["ok", "degraded", "error"]
     app_name: str
     version: str
@@ -42,6 +43,7 @@ class ReadinessResponse(BaseModel):
         database: Result of the database connectivity probe
             (``SELECT 1``). ``ok`` or ``error``.
     """
+
     status: Literal["ok", "degraded", "error"]
     database: Literal["ok", "error"]
 

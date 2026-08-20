@@ -1,7 +1,6 @@
 """Unit tests for security hardening measures."""
-from __future__ import annotations
 
-import pytest
+from __future__ import annotations
 
 
 class TestProductionDocsDisabled:

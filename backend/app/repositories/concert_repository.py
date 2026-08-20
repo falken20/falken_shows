@@ -14,7 +14,6 @@ from app.schemas.concert import (
     VenueUpdate,
 )
 
-
 # ---------------------------------------------------------------------------
 # Artist repository
 # ---------------------------------------------------------------------------
@@ -22,9 +21,7 @@ from app.schemas.concert import (
 
 class ArtistRepository:
     async def get_all(self, session: AsyncSession, *, skip: int, limit: int) -> list[Artist]:
-        result = await session.execute(
-            select(Artist).order_by(Artist.id).offset(skip).limit(limit)
-        )
+        result = await session.execute(select(Artist).order_by(Artist.id).offset(skip).limit(limit))
         return list(result.scalars().all())
 
     async def count(self, session: AsyncSession) -> int:
@@ -61,9 +58,7 @@ class ArtistRepository:
 
 class VenueRepository:
     async def get_all(self, session: AsyncSession, *, skip: int, limit: int) -> list[Venue]:
-        result = await session.execute(
-            select(Venue).order_by(Venue.id).offset(skip).limit(limit)
-        )
+        result = await session.execute(select(Venue).order_by(Venue.id).offset(skip).limit(limit))
         return list(result.scalars().all())
 
     async def count(self, session: AsyncSession) -> int:
@@ -107,11 +102,7 @@ _CONCERT_EAGER = [
 class ConcertRepository:
     async def get_all(self, session: AsyncSession, *, skip: int, limit: int) -> list[Concert]:
         result = await session.execute(
-            select(Concert)
-            .options(*_CONCERT_EAGER)
-            .order_by(Concert.date.desc())
-            .offset(skip)
-            .limit(limit)
+            select(Concert).options(*_CONCERT_EAGER).order_by(Concert.date.desc()).offset(skip).limit(limit)
         )
         return list(result.scalars().all())
 
@@ -120,9 +111,7 @@ class ConcertRepository:
         return result.scalar_one()
 
     async def get_by_id(self, session: AsyncSession, concert_id: int) -> Concert | None:
-        result = await session.execute(
-            select(Concert).options(*_CONCERT_EAGER).where(Concert.id == concert_id)
-        )
+        result = await session.execute(select(Concert).options(*_CONCERT_EAGER).where(Concert.id == concert_id))
         return result.scalar_one_or_none()
 
     async def create(self, session: AsyncSession, data: ConcertCreate) -> Concert:

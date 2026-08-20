@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import hmac
 
+from app.core.config import settings
 from app.core.exceptions import AppError, ErrorCode
 from app.core.security import create_access_token, hash_password, verify_password
-from app.core.config import settings
-
 
 _ADMIN_PASSWORD_HASH = hash_password(settings.ADMIN_PASSWORD)
 

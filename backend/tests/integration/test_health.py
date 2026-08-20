@@ -1,4 +1,5 @@
 """Integration tests for health check and readiness endpoints."""
+
 from __future__ import annotations
 
 from httpx import AsyncClient
@@ -40,7 +41,8 @@ async def test_security_headers_present(async_client: AsyncClient) -> None:
     assert response.headers.get("x-content-type-options") == "nosniff"
     assert response.headers.get("x-frame-options") == "DENY"
     assert response.headers.get("referrer-policy") == "strict-origin-when-cross-origin"
-    assert response.headers.get("content-security-policy") == "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+    csp = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+    assert response.headers.get("content-security-policy") == csp
     assert response.headers.get("permissions-policy") == "geolocation=(), camera=(), microphone=()"
 
 

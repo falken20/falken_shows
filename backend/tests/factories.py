@@ -1,7 +1,8 @@
 """Test data factory functions for Live Memories test suite."""
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -51,7 +52,7 @@ async def create_concert(
         "title": "Test Concert",
         "artist_id": artist.id if artist else None,
         "venue_id": venue.id if venue else None,
-        "date": datetime(2024, 6, 15, tzinfo=timezone.utc),
+        "date": datetime(2024, 6, 15, tzinfo=UTC),
         "setlist": None,
         "notes": None,
         "rating": None,

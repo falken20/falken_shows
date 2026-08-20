@@ -20,6 +20,7 @@ class Settings(BaseSettings):
         - In production, ADMIN_PASSWORD must be ≥12 chars and not start with ``change-me``.
         - ACCESS_TOKEN_EXPIRE_MINUTES must be in the range [1, 1440].
     """
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -90,7 +91,7 @@ class Settings(BaseSettings):
         return value
 
     @model_validator(mode="after")
-    def validate_security_settings(self) -> "Settings":
+    def validate_security_settings(self) -> Settings:
         """Cross-field security validation executed after all fields are populated."""
         if not self.CORS_ORIGINS:
             raise ValueError("CORS_ORIGINS must include at least one origin")
@@ -99,13 +100,9 @@ class Settings(BaseSettings):
 
         if self.APP_ENV == "production":
             if self.JWT_SECRET_KEY.startswith("change-me") or len(self.JWT_SECRET_KEY) < 32:
-                raise ValueError(
-                    "JWT_SECRET_KEY must be overridden in production and have at least 32 characters"
-                )
+                raise ValueError("JWT_SECRET_KEY must be overridden in production and have at least 32 characters")
             if self.ADMIN_PASSWORD.startswith("change-me") or len(self.ADMIN_PASSWORD) < 12:
-                raise ValueError(
-                    "ADMIN_PASSWORD must be overridden in production and have at least 12 characters"
-                )
+                raise ValueError("ADMIN_PASSWORD must be overridden in production and have at least 12 characters")
 
         return self
 

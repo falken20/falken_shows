@@ -57,4 +57,3 @@ def configure_logging() -> None:
     # Quieten noisy libraries
     logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
-

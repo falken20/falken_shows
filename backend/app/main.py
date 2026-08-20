@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 # ── In-memory rate limiter (sliding window) ────────────────────
 # Stores {ip: [timestamp, ...]} for a 60-second rolling window.
 _rate_limit_store: dict[str, list[float]] = defaultdict(list)
-_RATE_LIMIT_MAX = 120   # requests per window
+_RATE_LIMIT_MAX = 120  # requests per window
 _RATE_LIMIT_WINDOW = 60  # seconds
 _RATE_LIMIT_EXCLUDED_PATHS = {
     "/api/v1/health",
@@ -73,9 +73,7 @@ app.add_middleware(
 
 # ── Rate limiting middleware ───────────────────────────────────
 @app.middleware("http")
-async def rate_limit(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
+async def rate_limit(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
     """Sliding-window rate limiter: 120 requests per 60 seconds per IP.
 
     Maintains an in-memory list of request timestamps per client IP.  Old
@@ -111,9 +109,7 @@ async def rate_limit(
 
 # ── Request ID middleware ──────────────────────────────────────
 @app.middleware("http")
-async def add_request_id(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
+async def add_request_id(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
     """Attach a unique ``X-Request-ID`` header to every response.
 
     Clients and log aggregators can use this UUID to correlate frontend errors
@@ -127,9 +123,7 @@ async def add_request_id(
 
 # ── Security headers middleware ────────────────────────────────
 @app.middleware("http")
-async def add_security_headers(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
+async def add_security_headers(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
     """Inject OWASP-recommended security response headers on every request.
 
     Headers applied to all environments:
