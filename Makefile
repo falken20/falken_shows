@@ -19,6 +19,7 @@ help: ## Show this help message
 install: install-backend install-frontend ## Install all dependencies
 
 install-backend: ## Install Python dependencies
+	cd $(BACKEND_DIR) && [ -d .venv ] || $(UV) venv --prompt "Falken Shows" .venv
 	cd $(BACKEND_DIR) && $(UV) sync --dev --all-extras
 
 install-frontend: ## Install Node dependencies
