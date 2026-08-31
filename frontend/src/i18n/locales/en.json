@@ -66,7 +66,8 @@
       "editTitle": "Edit concert"
     },
     "detail": {
-      "deleteConfirm": "Delete this concert? This action cannot be undone."
+      "deleteConfirm": "Delete this concert? This action cannot be undone.",
+      "setlist": "Setlist"
     }
   }
 }

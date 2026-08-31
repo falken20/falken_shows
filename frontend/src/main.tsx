@@ -1,9 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import { ThemeModeProvider } from '@/hooks/useThemeMode'
+import { AuthProvider } from '@/hooks/useAuth'
 import './i18n'
 
-// Polyfill for MSW in development
 async function enableMocking() {
   if (import.meta.env.DEV && import.meta.env.VITE_MSW_ENABLED === 'true') {
     const { worker } = await import('./mocks/browser')
@@ -14,7 +15,11 @@ async function enableMocking() {
 void enableMocking().then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-      <App />
+      <ThemeModeProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </ThemeModeProvider>
     </React.StrictMode>
   )
 })

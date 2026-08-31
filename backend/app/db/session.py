@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine, create_engine, event
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -105,12 +105,14 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 def create_db_and_tables() -> None:
-    """Create all ORM tables that do not already exist.
-
-    Uses a temporary synchronous engine so it can be called from the FastAPI
-    ``lifespan`` context without requiring an active async event loop.  In
-    production, prefer Alembic migrations (``make migrate``) over this helper.
-    """
+    """Create all ORM tables that do not already exist."""
     sync_engine = _build_sync_engine()
+    _enable_sqlite_fk(sync_engine)
     Base.metadata.create_all(bind=sync_engine)
     sync_engine.dispose()
+
+
+def _enable_sqlite_fk(engine: Engine) -> None:
+    """Enable FK constraint enforcement for SQLite connections."""
+    if "sqlite" in str(engine.url):
+        event.listen(engine, "connect", lambda conn, _rec: conn.execute("PRAGMA foreign_keys=ON"))

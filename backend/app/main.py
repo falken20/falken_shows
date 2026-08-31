@@ -25,10 +25,16 @@ logger = logging.getLogger(__name__)
 _rate_limit_store: dict[str, list[float]] = defaultdict(list)
 _RATE_LIMIT_MAX = 120  # requests per window
 _RATE_LIMIT_WINDOW = 60  # seconds
+_RATE_LIMIT_MAX_TRACKED_IPS = 10_000
 _RATE_LIMIT_EXCLUDED_PATHS = {
     "/api/v1/health",
     "/api/v1/ready",
 }
+
+# Login brute-force protection: track failed attempts per IP
+_login_attempts: dict[str, list[float]] = defaultdict(list)
+_LOGIN_MAX_ATTEMPTS = 10
+_LOGIN_WINDOW = 300  # 5 minutes
 
 
 @asynccontextmanager
@@ -65,7 +71,7 @@ app.add_exception_handler(AppError, app_error_handler)  # type: ignore[arg-type]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
-    allow_credentials=settings.APP_ENV != "production",
+    allow_credentials=settings.APP_ENV not in ("production", "staging"),
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"],
 )
@@ -88,11 +94,16 @@ async def rate_limit(request: Request, call_next: Callable[[Request], Awaitable[
     if request.url.path in _RATE_LIMIT_EXCLUDED_PATHS:
         return await call_next(request)
 
-    client_ip = request.client.host if request.client else "unknown"
+    # Use X-Forwarded-For behind reverse proxies (Cloud Run, nginx)
+    forwarded = request.headers.get("x-forwarded-for")
+    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
     now = time.time()
     window_start = now - _RATE_LIMIT_WINDOW
 
-    # Prune old entries
+    # Cap tracked IPs to prevent unbounded memory growth
+    if len(_rate_limit_store) > _RATE_LIMIT_MAX_TRACKED_IPS:
+        _rate_limit_store.clear()
+
     timestamps = _rate_limit_store[client_ip]
     _rate_limit_store[client_ip] = [t for t in timestamps if t > window_start]
 
@@ -116,6 +127,7 @@ async def add_request_id(request: Request, call_next: Callable[[Request], Awaita
     with backend log entries across distributed traces.
     """
     request_id = str(uuid.uuid4())
+    request.state.request_id = request_id
     response = await call_next(request)
     response.headers["X-Request-ID"] = request_id
     return response

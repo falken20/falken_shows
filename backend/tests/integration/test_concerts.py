@@ -11,17 +11,6 @@ from tests.factories import create_artist, create_concert, create_venue
 pytestmark = pytest.mark.asyncio
 
 
-async def _get_token(client: AsyncClient) -> str:
-    """Obtain a valid JWT for the default admin user."""
-    response = await client.post(
-        "/api/v1/auth/token",
-        data={"username": "admin@example.com", "password": "change-me-in-production"},
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
-    assert response.status_code == 200
-    return str(response.json()["access_token"])
-
-
 class TestListConcerts:
     async def test_returns_empty_list_when_no_concerts(self, async_client: AsyncClient) -> None:
         response = await async_client.get("/api/v1/concerts")
@@ -66,8 +55,8 @@ class TestGetConcert:
 
 
 class TestCreateConcert:
-    async def test_creates_concert_with_auth(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_creates_concert_with_auth(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         payload = {"title": "New Concert", "date": "2024-06-15T00:00:00", "currency": "EUR"}
         response = await async_client.post(
             "/api/v1/concerts",
@@ -82,8 +71,8 @@ class TestCreateConcert:
         response = await async_client.post("/api/v1/concerts", json=payload)
         assert response.status_code == 401
 
-    async def test_create_validates_required_fields(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_create_validates_required_fields(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         response = await async_client.post(
             "/api/v1/concerts",
             json={},
@@ -93,9 +82,11 @@ class TestCreateConcert:
 
 
 class TestUpdateConcert:
-    async def test_updates_concert_with_auth(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_updates_concert_with_auth(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_token: str
+    ) -> None:
         concert = await create_concert(db_session, title="Original Title")
-        token = await _get_token(async_client)
+        token = auth_token
 
         response = await async_client.put(
             f"/api/v1/concerts/{concert.id}",
@@ -105,8 +96,8 @@ class TestUpdateConcert:
         assert response.status_code == 200
         assert response.json()["title"] == "Updated Title"
 
-    async def test_update_returns_404_for_unknown(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_update_returns_404_for_unknown(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         response = await async_client.put(
             "/api/v1/concerts/99999",
             json={"title": "Updated"},
@@ -116,9 +107,11 @@ class TestUpdateConcert:
 
 
 class TestDeleteConcert:
-    async def test_deletes_concert_with_auth(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_deletes_concert_with_auth(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_token: str
+    ) -> None:
         concert = await create_concert(db_session)
-        token = await _get_token(async_client)
+        token = auth_token
 
         response = await async_client.delete(
             f"/api/v1/concerts/{concert.id}",
@@ -126,8 +119,8 @@ class TestDeleteConcert:
         )
         assert response.status_code == 204
 
-    async def test_delete_returns_404_for_unknown(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_delete_returns_404_for_unknown(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         response = await async_client.delete(
             "/api/v1/concerts/99999",
             headers={"Authorization": f"Bearer {token}"},

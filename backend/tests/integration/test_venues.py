@@ -11,17 +11,6 @@ from tests.factories import create_venue
 pytestmark = pytest.mark.asyncio
 
 
-async def _get_token(client: AsyncClient) -> str:
-    """Obtain a valid JWT for the default admin user."""
-    response = await client.post(
-        "/api/v1/auth/token",
-        data={"username": "admin@example.com", "password": "change-me-in-production"},
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
-    assert response.status_code == 200
-    return str(response.json()["access_token"])
-
-
 class TestListVenues:
     async def test_returns_empty_list_when_no_venues(self, async_client: AsyncClient) -> None:
         response = await async_client.get("/api/v1/venues")
@@ -70,8 +59,8 @@ class TestGetVenue:
 
 
 class TestCreateVenue:
-    async def test_creates_venue_with_auth(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_creates_venue_with_auth(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         payload = {"name": "The O2", "city": "London", "country": "GB", "capacity": 20000}
         response = await async_client.post(
             "/api/v1/venues",
@@ -89,8 +78,8 @@ class TestCreateVenue:
         response = await async_client.post("/api/v1/venues", json=payload)
         assert response.status_code == 401
 
-    async def test_create_validates_required_fields(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_create_validates_required_fields(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         response = await async_client.post(
             "/api/v1/venues",
             json={},
@@ -100,9 +89,11 @@ class TestCreateVenue:
 
 
 class TestUpdateVenue:
-    async def test_updates_venue_with_auth(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_updates_venue_with_auth(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_token: str
+    ) -> None:
         venue = await create_venue(db_session, name="Old Name")
-        token = await _get_token(async_client)
+        token = auth_token
 
         response = await async_client.put(
             f"/api/v1/venues/{venue.id}",
@@ -112,8 +103,8 @@ class TestUpdateVenue:
         assert response.status_code == 200
         assert response.json()["name"] == "New Name"
 
-    async def test_update_returns_404_for_unknown(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_update_returns_404_for_unknown(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         response = await async_client.put(
             "/api/v1/venues/99999",
             json={"name": "New Name"},
@@ -123,9 +114,11 @@ class TestUpdateVenue:
 
 
 class TestDeleteVenue:
-    async def test_deletes_venue_with_auth(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_deletes_venue_with_auth(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_token: str
+    ) -> None:
         venue = await create_venue(db_session)
-        token = await _get_token(async_client)
+        token = auth_token
 
         response = await async_client.delete(
             f"/api/v1/venues/{venue.id}",
@@ -133,8 +126,8 @@ class TestDeleteVenue:
         )
         assert response.status_code == 204
 
-    async def test_delete_returns_404_for_unknown(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_delete_returns_404_for_unknown(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         response = await async_client.delete(
             "/api/v1/venues/99999",
             headers={"Authorization": f"Bearer {token}"},

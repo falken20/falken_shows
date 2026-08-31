@@ -11,17 +11,6 @@ from tests.factories import create_artist
 pytestmark = pytest.mark.asyncio
 
 
-async def _get_token(client: AsyncClient) -> str:
-    """Obtain a valid JWT for the default admin user."""
-    response = await client.post(
-        "/api/v1/auth/token",
-        data={"username": "admin@example.com", "password": "change-me-in-production"},
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
-    assert response.status_code == 200
-    return str(response.json()["access_token"])
-
-
 class TestListArtists:
     async def test_returns_empty_list_when_no_artists(self, async_client: AsyncClient) -> None:
         response = await async_client.get("/api/v1/artists")
@@ -69,8 +58,8 @@ class TestGetArtist:
 
 
 class TestCreateArtist:
-    async def test_creates_artist_with_auth(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_creates_artist_with_auth(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         payload = {"name": "Nick Cave", "country": "AU"}
         response = await async_client.post(
             "/api/v1/artists",
@@ -87,8 +76,8 @@ class TestCreateArtist:
         response = await async_client.post("/api/v1/artists", json={"name": "Nick Cave"})
         assert response.status_code == 401
 
-    async def test_create_validates_required_fields(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_create_validates_required_fields(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         response = await async_client.post(
             "/api/v1/artists",
             json={},
@@ -98,9 +87,11 @@ class TestCreateArtist:
 
 
 class TestUpdateArtist:
-    async def test_updates_artist_with_auth(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_updates_artist_with_auth(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_token: str
+    ) -> None:
         artist = await create_artist(db_session, name="Old Name")
-        token = await _get_token(async_client)
+        token = auth_token
 
         response = await async_client.put(
             f"/api/v1/artists/{artist.id}",
@@ -110,8 +101,8 @@ class TestUpdateArtist:
         assert response.status_code == 200
         assert response.json()["name"] == "New Name"
 
-    async def test_update_returns_404_for_unknown(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_update_returns_404_for_unknown(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         response = await async_client.put(
             "/api/v1/artists/99999",
             json={"name": "New Name"},
@@ -121,9 +112,11 @@ class TestUpdateArtist:
 
 
 class TestDeleteArtist:
-    async def test_deletes_artist_with_auth(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_deletes_artist_with_auth(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_token: str
+    ) -> None:
         artist = await create_artist(db_session)
-        token = await _get_token(async_client)
+        token = auth_token
 
         response = await async_client.delete(
             f"/api/v1/artists/{artist.id}",
@@ -131,8 +124,8 @@ class TestDeleteArtist:
         )
         assert response.status_code == 204
 
-    async def test_delete_returns_404_for_unknown(self, async_client: AsyncClient) -> None:
-        token = await _get_token(async_client)
+    async def test_delete_returns_404_for_unknown(self, async_client: AsyncClient, auth_token: str) -> None:
+        token = auth_token
         response = await async_client.delete(
             "/api/v1/artists/99999",
             headers={"Authorization": f"Bearer {token}"},

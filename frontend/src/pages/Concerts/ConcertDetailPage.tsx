@@ -34,7 +34,10 @@ export default function ConcertDetailPage() {
   const { isAuthenticated } = useAuth()
   const [deleteOpen, setDeleteOpen] = useState(false)
 
-  const numericId = Number(id)
+  const numericId = parseInt(id ?? '', 10)
+  if (Number.isNaN(numericId)) {
+    void navigate('/404', { replace: true })
+  }
   const { data: concert, isLoading, isError } = useConcert(numericId)
   const deleteMutation = useDeleteConcert()
 
@@ -184,7 +187,7 @@ export default function ConcertDetailPage() {
               <Divider />
               <Stack spacing={0.5}>
                 <Typography variant="body2" color="text.secondary">
-                  Setlist
+                  {t('concerts.detail.setlist')}
                 </Typography>
                 <Stack direction="row" flexWrap="wrap" gap={1}>
                   {concert.setlist.map((song, idx) => (

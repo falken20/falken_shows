@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from collections.abc import AsyncGenerator
 
+import pytest
 from httpx import AsyncClient
+
+pytestmark = pytest.mark.asyncio
 
 
 async def test_health_check_returns_200(async_client: AsyncClient) -> None:

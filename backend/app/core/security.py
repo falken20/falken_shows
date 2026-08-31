@@ -3,9 +3,10 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any
 
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+from jwt import InvalidTokenError
 from passlib.context import CryptContext
 
 from app.core.config import settings
@@ -35,7 +36,7 @@ def create_access_token(
         expires_delta if expires_delta is not None else timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     to_encode["exp"] = expire
-    return str(jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM))
+    return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> dict[str, Any]:
@@ -57,6 +58,6 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> dict[str,
         sub: str | None = payload.get("sub")
         if sub is None:
             raise credentials_exception
-    except JWTError as err:
+    except InvalidTokenError as err:
         raise credentials_exception from err
     return payload

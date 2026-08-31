@@ -42,3 +42,15 @@ async def async_client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, 
         yield client
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+async def auth_token(async_client: AsyncClient) -> str:
+    """Obtain a valid JWT for the default admin user."""
+    response = await async_client.post(
+        "/api/v1/auth/token",
+        data={"username": "admin@example.com", "password": "change-me-in-production"},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    assert response.status_code == 200
+    return str(response.json()["access_token"])

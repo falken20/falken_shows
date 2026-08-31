@@ -142,7 +142,7 @@ export default function ConcertsPage() {
               {t('common.previous')}
             </Button>
             <Typography variant="body2">
-              {`${t('common.page', { defaultValue: 'Página' })} ${data.page} / ${data.pages}`}
+              {`${t('common.page')} ${data.page} / ${data.pages}`}
             </Typography>
             <Button
               disabled={page >= data.pages}

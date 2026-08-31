@@ -27,64 +27,46 @@ export const authApi = {
   },
 }
 
-/** Artist CRUD endpoints */
+/** Artist CRUD endpoints (token attached by Axios interceptor) */
 export const artistsApi = {
   getAll: (page = 1, pageSize = 20): Promise<PaginatedResponse<ArtistResponse>> =>
     apiClient
-      .get<PaginatedResponse<ArtistResponse>>('/artists', { params: { page, page_size: pageSize } })
+      .get<PaginatedResponse<ArtistResponse>>('/artists', {
+        params: { page, page_size: pageSize },
+      })
       .then(r => r.data),
 
   getById: (id: number): Promise<ArtistResponse> =>
     apiClient.get<ArtistResponse>(`/artists/${id}`).then(r => r.data),
 
-  create: (data: ArtistCreate, token: string): Promise<ArtistResponse> =>
-    apiClient
-      .post<ArtistResponse>('/artists', data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(r => r.data),
+  create: (data: ArtistCreate): Promise<ArtistResponse> =>
+    apiClient.post<ArtistResponse>('/artists', data).then(r => r.data),
 
-  update: (id: number, data: ArtistUpdate, token: string): Promise<ArtistResponse> =>
-    apiClient
-      .put<ArtistResponse>(`/artists/${id}`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(r => r.data),
+  update: (id: number, data: ArtistUpdate): Promise<ArtistResponse> =>
+    apiClient.put<ArtistResponse>(`/artists/${id}`, data).then(r => r.data),
 
-  delete: (id: number, token: string): Promise<void> =>
-    apiClient
-      .delete(`/artists/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(() => undefined),
+  delete: (id: number): Promise<void> => apiClient.delete(`/artists/${id}`).then(() => undefined),
 }
 
 /** Venue CRUD endpoints */
 export const venuesApi = {
   getAll: (page = 1, pageSize = 20): Promise<PaginatedResponse<VenueResponse>> =>
     apiClient
-      .get<PaginatedResponse<VenueResponse>>('/venues', { params: { page, page_size: pageSize } })
+      .get<PaginatedResponse<VenueResponse>>('/venues', {
+        params: { page, page_size: pageSize },
+      })
       .then(r => r.data),
 
   getById: (id: number): Promise<VenueResponse> =>
     apiClient.get<VenueResponse>(`/venues/${id}`).then(r => r.data),
 
-  create: (data: VenueCreate, token: string): Promise<VenueResponse> =>
-    apiClient
-      .post<VenueResponse>('/venues', data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(r => r.data),
+  create: (data: VenueCreate): Promise<VenueResponse> =>
+    apiClient.post<VenueResponse>('/venues', data).then(r => r.data),
 
-  update: (id: number, data: VenueUpdate, token: string): Promise<VenueResponse> =>
-    apiClient
-      .put<VenueResponse>(`/venues/${id}`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(r => r.data),
+  update: (id: number, data: VenueUpdate): Promise<VenueResponse> =>
+    apiClient.put<VenueResponse>(`/venues/${id}`, data).then(r => r.data),
 
-  delete: (id: number, token: string): Promise<void> =>
-    apiClient
-      .delete(`/venues/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(() => undefined),
+  delete: (id: number): Promise<void> => apiClient.delete(`/venues/${id}`).then(() => undefined),
 }
 
 /** Concert CRUD endpoints */
@@ -99,22 +81,11 @@ export const concertsApi = {
   getById: (id: number): Promise<ConcertResponse> =>
     apiClient.get<ConcertResponse>(`/concerts/${id}`).then(r => r.data),
 
-  create: (data: ConcertCreate, token: string): Promise<ConcertResponse> =>
-    apiClient
-      .post<ConcertResponse>('/concerts', data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(r => r.data),
+  create: (data: ConcertCreate): Promise<ConcertResponse> =>
+    apiClient.post<ConcertResponse>('/concerts', data).then(r => r.data),
 
-  update: (id: number, data: ConcertUpdate, token: string): Promise<ConcertResponse> =>
-    apiClient
-      .put<ConcertResponse>(`/concerts/${id}`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(r => r.data),
+  update: (id: number, data: ConcertUpdate): Promise<ConcertResponse> =>
+    apiClient.put<ConcertResponse>(`/concerts/${id}`, data).then(r => r.data),
 
-  delete: (id: number, token: string): Promise<void> =>
-    apiClient
-      .delete(`/concerts/${id}`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(() => undefined),
+  delete: (id: number): Promise<void> => apiClient.delete(`/concerts/${id}`).then(() => undefined),
 }

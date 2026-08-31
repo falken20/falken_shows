@@ -55,7 +55,10 @@ export default function ConcertFormPage() {
   const { isAuthenticated } = useAuth()
 
   const isEditing = id !== undefined
-  const numericId = isEditing ? Number(id) : 0
+  const numericId = isEditing ? parseInt(id, 10) : 0
+  if (isEditing && Number.isNaN(numericId)) {
+    void navigate('/404', { replace: true })
+  }
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -65,8 +68,8 @@ export default function ConcertFormPage() {
   }, [isAuthenticated, navigate])
 
   const { data: existing, isLoading: loadingConcert } = useConcert(numericId)
-  const { data: artistsData } = useArtists(1, 100)
-  const { data: venuesData } = useVenues(1, 100)
+  const { data: artistsData } = useArtists(1, 500)
+  const { data: venuesData } = useVenues(1, 500)
 
   const createMutation = useCreateConcert()
   const updateMutation = useUpdateConcert()

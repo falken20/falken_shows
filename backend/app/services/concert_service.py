@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import AppError, ErrorCode
@@ -22,16 +24,13 @@ _venue_repo = VenueRepository()
 _concert_repo = ConcertRepository()
 
 
-# ---------------------------------------------------------------------------
-# Artist service
-# ---------------------------------------------------------------------------
-
-
 class ArtistService:
     async def list_artists(self, session: AsyncSession, page: int, page_size: int) -> PaginatedResponse[ArtistResponse]:
         skip = (page - 1) * page_size
-        artists = await _artist_repo.get_all(session, skip=skip, limit=page_size)
-        total = await _artist_repo.count(session)
+        artists, total = await asyncio.gather(
+            _artist_repo.get_all(session, skip=skip, limit=page_size),
+            _artist_repo.count(session),
+        )
         items = [ArtistResponse.model_validate(a) for a in artists]
         return PaginatedResponse.build(items=items, total=total, page=page, page_size=page_size)
 
@@ -59,15 +58,13 @@ class ArtistService:
         await _artist_repo.delete(session, artist)
 
 
-# ---------------------------------------------------------------------------
-# Venue service
-# ---------------------------------------------------------------------------
-
-
 class VenueService:
     async def list_venues(self, session: AsyncSession, page: int, page_size: int) -> PaginatedResponse[VenueResponse]:
         skip = (page - 1) * page_size
-        venues, total = await _venue_repo.get_all(session, skip=skip, limit=page_size), await _venue_repo.count(session)
+        venues, total = await asyncio.gather(
+            _venue_repo.get_all(session, skip=skip, limit=page_size),
+            _venue_repo.count(session),
+        )
         items = [VenueResponse.model_validate(v) for v in venues]
         return PaginatedResponse.build(items=items, total=total, page=page, page_size=page_size)
 
@@ -95,19 +92,14 @@ class VenueService:
         await _venue_repo.delete(session, venue)
 
 
-# ---------------------------------------------------------------------------
-# Concert service
-# ---------------------------------------------------------------------------
-
-
 class ConcertService:
     async def list_concerts(
         self, session: AsyncSession, page: int, page_size: int
     ) -> PaginatedResponse[ConcertResponse]:
         skip = (page - 1) * page_size
-        concerts, total = (
-            await _concert_repo.get_all(session, skip=skip, limit=page_size),
-            await _concert_repo.count(session),
+        concerts, total = await asyncio.gather(
+            _concert_repo.get_all(session, skip=skip, limit=page_size),
+            _concert_repo.count(session),
         )
         items = [ConcertResponse.model_validate(c) for c in concerts]
         return PaginatedResponse.build(items=items, total=total, page=page, page_size=page_size)
@@ -119,6 +111,7 @@ class ConcertService:
         return ConcertResponse.model_validate(concert)
 
     async def create_concert(self, session: AsyncSession, data: ConcertCreate) -> ConcertResponse:
+        await self._validate_fk_refs(session, data.artist_id, data.venue_id)
         concert = await _concert_repo.create(session, data)
         return ConcertResponse.model_validate(concert)
 
@@ -126,6 +119,7 @@ class ConcertService:
         concert = await _concert_repo.get_by_id(session, concert_id)
         if concert is None:
             raise AppError(ErrorCode.CONCERT_NOT_FOUND, status_code=404)
+        await self._validate_fk_refs(session, data.artist_id, data.venue_id)
         updated = await _concert_repo.update(session, concert, data)
         return ConcertResponse.model_validate(updated)
 
@@ -134,3 +128,10 @@ class ConcertService:
         if concert is None:
             raise AppError(ErrorCode.CONCERT_NOT_FOUND, status_code=404)
         await _concert_repo.delete(session, concert)
+
+    @staticmethod
+    async def _validate_fk_refs(session: AsyncSession, artist_id: int | None, venue_id: int | None) -> None:
+        if artist_id is not None and await _artist_repo.get_by_id(session, artist_id) is None:
+            raise AppError(ErrorCode.ARTIST_NOT_FOUND, status_code=404, message="Referenced artist does not exist")
+        if venue_id is not None and await _venue_repo.get_by_id(session, venue_id) is None:
+            raise AppError(ErrorCode.VENUE_NOT_FOUND, status_code=404, message="Referenced venue does not exist")

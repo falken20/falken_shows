@@ -29,4 +29,117 @@ export const handlers = [
       database: 'ok',
     })
   }),
+
+  // Auth
+  http.post(`${API_BASE}/auth/token`, () => {
+    return HttpResponse.json({ access_token: 'mock-jwt-token', token_type: 'bearer' })
+  }),
+
+  // Artists
+  http.get(`${API_BASE}/artists`, () => {
+    return HttpResponse.json({
+      items: [
+        {
+          id: 1,
+          name: 'Mock Artist',
+          bio: null,
+          country: 'ES',
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_size: 20,
+      pages: 1,
+    })
+  }),
+
+  // Venues
+  http.get(`${API_BASE}/venues`, () => {
+    return HttpResponse.json({
+      items: [
+        {
+          id: 1,
+          name: 'Mock Venue',
+          city: 'Madrid',
+          country: 'ES',
+          capacity: 500,
+          created_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_size: 20,
+      pages: 1,
+    })
+  }),
+
+  // Concerts
+  http.get(`${API_BASE}/concerts`, () => {
+    return HttpResponse.json({
+      items: [
+        {
+          id: 1,
+          title: 'Mock Concert',
+          artist: {
+            id: 1,
+            name: 'Mock Artist',
+            bio: null,
+            country: 'ES',
+            created_at: '2024-01-01T00:00:00Z',
+          },
+          venue: {
+            id: 1,
+            name: 'Mock Venue',
+            city: 'Madrid',
+            country: 'ES',
+            capacity: 500,
+            created_at: '2024-01-01T00:00:00Z',
+          },
+          date: '2024-06-15T20:00:00Z',
+          setlist: null,
+          notes: null,
+          rating: 4,
+          ticket_price: 25.0,
+          currency: 'EUR',
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_size: 20,
+      pages: 1,
+    })
+  }),
+
+  http.get(`${API_BASE}/concerts/:id`, () => {
+    return HttpResponse.json({
+      id: 1,
+      title: 'Mock Concert',
+      artist: {
+        id: 1,
+        name: 'Mock Artist',
+        bio: null,
+        country: 'ES',
+        created_at: '2024-01-01T00:00:00Z',
+      },
+      venue: {
+        id: 1,
+        name: 'Mock Venue',
+        city: 'Madrid',
+        country: 'ES',
+        capacity: 500,
+        created_at: '2024-01-01T00:00:00Z',
+      },
+      date: '2024-06-15T20:00:00Z',
+      setlist: ['Song 1', 'Song 2'],
+      notes: 'Great show',
+      rating: 5,
+      ticket_price: 30.0,
+      currency: 'EUR',
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    })
+  }),
 ]
