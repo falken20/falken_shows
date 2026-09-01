@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import asyncio
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import AppError, ErrorCode
@@ -27,10 +25,8 @@ _concert_repo = ConcertRepository()
 class ArtistService:
     async def list_artists(self, session: AsyncSession, page: int, page_size: int) -> PaginatedResponse[ArtistResponse]:
         skip = (page - 1) * page_size
-        artists, total = await asyncio.gather(
-            _artist_repo.get_all(session, skip=skip, limit=page_size),
-            _artist_repo.count(session),
-        )
+        artists = await _artist_repo.get_all(session, skip=skip, limit=page_size)
+        total = await _artist_repo.count(session)
         items = [ArtistResponse.model_validate(a) for a in artists]
         return PaginatedResponse.build(items=items, total=total, page=page, page_size=page_size)
 
@@ -61,10 +57,8 @@ class ArtistService:
 class VenueService:
     async def list_venues(self, session: AsyncSession, page: int, page_size: int) -> PaginatedResponse[VenueResponse]:
         skip = (page - 1) * page_size
-        venues, total = await asyncio.gather(
-            _venue_repo.get_all(session, skip=skip, limit=page_size),
-            _venue_repo.count(session),
-        )
+        venues = await _venue_repo.get_all(session, skip=skip, limit=page_size)
+        total = await _venue_repo.count(session)
         items = [VenueResponse.model_validate(v) for v in venues]
         return PaginatedResponse.build(items=items, total=total, page=page, page_size=page_size)
 
@@ -97,10 +91,8 @@ class ConcertService:
         self, session: AsyncSession, page: int, page_size: int
     ) -> PaginatedResponse[ConcertResponse]:
         skip = (page - 1) * page_size
-        concerts, total = await asyncio.gather(
-            _concert_repo.get_all(session, skip=skip, limit=page_size),
-            _concert_repo.count(session),
-        )
+        concerts = await _concert_repo.get_all(session, skip=skip, limit=page_size)
+        total = await _concert_repo.count(session)
         items = [ConcertResponse.model_validate(c) for c in concerts]
         return PaginatedResponse.build(items=items, total=total, page=page, page_size=page_size)
 

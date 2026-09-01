@@ -285,6 +285,57 @@ resource "google_cloud_run_v2_service_iam_member" "backend_public" {
   member   = "allUsers"
 }
 
+# ── Cloud Run – Database migrations ───────────────────────────
+resource "google_cloud_run_v2_job" "migrations" {
+  project  = var.project_id
+  name     = "${var.app_name}-migrations"
+  location = var.region
+  labels   = local.common_labels
+
+  template {
+    template {
+      service_account = google_service_account.backend.email
+
+      containers {
+        image   = var.backend_image
+        command = ["alembic"]
+        args    = ["upgrade", "head"]
+
+        env {
+          name  = "DATABASE_URL"
+          value = "postgresql+psycopg2://${var.db_user}@/${var.db_name}?host=/cloudsql/${google_sql_database_instance.main.connection_name}"
+        }
+
+        env {
+          name = "DB_PASSWORD"
+          value_source {
+            secret_key_ref {
+              secret  = "live-memories-db-password"
+              version = var.db_password_secret_version
+            }
+          }
+        }
+
+        volume_mounts {
+          name       = "cloudsql"
+          mount_path = "/cloudsql"
+        }
+      }
+
+      volumes {
+        name = "cloudsql"
+        cloud_sql_instance {
+          instances = [google_sql_database_instance.main.connection_name]
+        }
+      }
+
+      max_retries = 1
+    }
+  }
+
+  depends_on = [google_project_service.apis]
+}
+
 # ── Cloud Run – Frontend ──────────────────────────────────────
 resource "google_cloud_run_v2_service" "frontend" {
   project  = var.project_id

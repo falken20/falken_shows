@@ -59,8 +59,8 @@ export default function ConcertFormPage() {
   const { isAuthenticated } = useAuth()
 
   const isEditing = id !== undefined
-  const parsedId = isEditing ? parseInt(id, 10) : 0
-  const isInvalidEditId = isEditing && Number.isNaN(parsedId)
+  const parsedId = isEditing ? Number(id) : 0
+  const isInvalidEditId = isEditing && (!Number.isInteger(parsedId) || parsedId < 1)
   const numericId = isInvalidEditId ? 0 : parsedId
 
   // Redirect if not authenticated

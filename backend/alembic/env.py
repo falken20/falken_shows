@@ -3,6 +3,7 @@
 Uses synchronous SQLAlchemy engine to avoid the greenlet requirement.
 The DATABASE_URL environment variable selects the appropriate driver.
 """
+
 from __future__ import annotations
 
 from logging.config import fileConfig
@@ -10,14 +11,13 @@ from logging.config import fileConfig
 from sqlalchemy import create_engine, pool
 from sqlalchemy.engine import Connection
 
-from alembic import context
-
-# Import all models so Alembic can detect them
-from app.db.session import Base  # noqa: F401 – registers metadata
-from app.core.config import settings
-
 # Import models to populate Base.metadata
 import app.models  # noqa: F401
+from alembic import context
+from app.core.config import settings
+
+# Import all models so Alembic can detect them
+from app.db.session import Base, _inject_db_password  # noqa: F401 – registers metadata
 
 config = context.config
 
@@ -29,7 +29,7 @@ target_metadata = Base.metadata
 
 def get_sync_url() -> str:
     """Convert async database URL to sync URL for Alembic."""
-    url = settings.DATABASE_URL
+    url = _inject_db_password(settings.DATABASE_URL)
     return url.replace("+aiosqlite", "").replace("+asyncpg", "+psycopg2")
 
 

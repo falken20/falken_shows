@@ -34,8 +34,8 @@ export default function ConcertDetailPage() {
   const { isAuthenticated } = useAuth()
   const [deleteOpen, setDeleteOpen] = useState(false)
 
-  const parsedId = parseInt(id ?? '', 10)
-  const isInvalidId = Number.isNaN(parsedId)
+  const parsedId = Number(id)
+  const isInvalidId = !Number.isInteger(parsedId) || parsedId < 1
   const numericId = isInvalidId ? 0 : parsedId
   const { data: concert, isLoading, isError } = useConcert(numericId)
   const deleteMutation = useDeleteConcert()
@@ -44,11 +44,14 @@ export default function ConcertDetailPage() {
     return <Navigate to="/404" replace />
   }
 
-  const handleDelete = () => {
-    void deleteMutation.mutateAsync(numericId).then(() => {
+  const handleDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync(numericId)
       setDeleteOpen(false)
       void navigate('/concerts')
-    })
+    } catch {
+      return
+    }
   }
 
   if (isLoading) {
@@ -212,6 +215,11 @@ export default function ConcertDetailPage() {
         <DialogTitle id="delete-dialog-title">{t('common.confirm')}</DialogTitle>
         <DialogContent>
           <Typography>{t('concerts.detail.deleteConfirm')}</Typography>
+          {deleteMutation.isError && (
+            <Alert severity="error" role="alert" sx={{ mt: 2 }}>
+              {t('errors.generic')}
+            </Alert>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteOpen(false)} aria-label={t('common.cancel')}>
@@ -221,7 +229,7 @@ export default function ConcertDetailPage() {
             color="error"
             variant="contained"
             onClick={() => {
-              handleDelete()
+              void handleDelete()
             }}
             disabled={deleteMutation.isPending}
             aria-label={t('common.delete')}

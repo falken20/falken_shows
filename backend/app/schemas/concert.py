@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import math
 from datetime import datetime
-from typing import Generic, TypeVar
+from typing import Annotated, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -35,7 +35,7 @@ class PaginatedResponse(BaseModel, Generic[T]):
 
 class ArtistBase(BaseModel):
     name: str = Field(..., max_length=255)
-    bio: str | None = None
+    bio: str | None = Field(None, max_length=10000)
     country: str | None = Field(None, max_length=100)
 
 
@@ -45,7 +45,7 @@ class ArtistCreate(ArtistBase):
 
 class ArtistUpdate(BaseModel):
     name: str | None = Field(None, max_length=255)
-    bio: str | None = None
+    bio: str | None = Field(None, max_length=10000)
     country: str | None = Field(None, max_length=100)
 
 
@@ -96,8 +96,8 @@ class ConcertBase(BaseModel):
     artist_id: int | None = None
     venue_id: int | None = None
     date: datetime
-    setlist: list[str] | None = None
-    notes: str | None = None
+    setlist: list[Annotated[str, Field(max_length=255)]] | None = Field(None, max_length=500)
+    notes: str | None = Field(None, max_length=10000)
     rating: int | None = Field(None, ge=1, le=5)
     ticket_price: float | None = Field(None, ge=0)
     currency: str = Field("EUR", max_length=3)
@@ -112,8 +112,8 @@ class ConcertUpdate(BaseModel):
     artist_id: int | None = None
     venue_id: int | None = None
     date: datetime | None = None
-    setlist: list[str] | None = None
-    notes: str | None = None
+    setlist: list[Annotated[str, Field(max_length=255)]] | None = Field(None, max_length=500)
+    notes: str | None = Field(None, max_length=10000)
     rating: int | None = Field(None, ge=1, le=5)
     ticket_price: float | None = Field(None, ge=0)
     currency: str | None = Field(None, max_length=3)

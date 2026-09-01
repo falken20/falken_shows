@@ -171,7 +171,12 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     500 response using the standard error envelope.  Avoids leaking internal
     stack traces to API consumers.
     """
-    logger.error("unhandled_exception path=%s error=%s", request.url.path, exc, exc_info=exc)
+    logger.error(
+        "unhandled_exception path=%s request_id=%s error_type=%s",
+        request.url.path,
+        getattr(request.state, "request_id", "unknown"),
+        type(exc).__name__,
+    )
     return JSONResponse(
         status_code=500,
         content={

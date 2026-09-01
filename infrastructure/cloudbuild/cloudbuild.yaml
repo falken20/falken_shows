@@ -67,6 +67,18 @@ steps:
 
   # ── Run Alembic migrations ────────────────────────────────────
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    id: update-migrations
+    entrypoint: gcloud
+    args:
+      - run
+      - jobs
+      - update
+      - live-memories-migrations
+      - --image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO}/backend:${SHORT_SHA}
+      - --region=${_REGION}
+    waitFor: [push-backend]
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     id: run-migrations
     entrypoint: gcloud
     args:
@@ -76,7 +88,7 @@ steps:
       - live-memories-migrations
       - --region=${_REGION}
       - --wait
-    waitFor: [push-backend]
+    waitFor: [update-migrations]
 
   # ── Deploy backend ────────────────────────────────────────────
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
