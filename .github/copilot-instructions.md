@@ -12,7 +12,7 @@ Live Memories is a full-stack web application for cataloguing personal concert e
 live-memories/
 ├── backend/    # Python 3.12 + FastAPI + SQLAlchemy 2 + Alembic
 ├── frontend/   # React 18 + TypeScript + Vite + Material UI
-├── infrastructure/  # Terraform + Cloud Build
+├── infrastructure/  # Cloud Build
 └── docs/       # ADRs and architecture docs
 ```
 

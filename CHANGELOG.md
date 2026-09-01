@@ -29,8 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   backend now requires service-account authentication
   (`google_cloud_run_v2_service_iam_member` with frontend SA as invoker).
 - **CRITICAL** – Database password no longer interpolated into Cloud Run env var;
-  all three secrets (JWT, DB password, admin password) injected via
-  `secret_key_ref` in Terraform.
+  all three secrets (JWT, DB password, admin password) are injected through
+  Secret Manager references configured in the GCP Console.
 - **HIGH** – Cloud SQL public IP disabled (`ipv4_enabled = false`); instance
   now reachable only via VPC private network with `require_ssl = true`.
 - **HIGH** – Updated `react-router-dom` to `^7.18.0` (CVE-2025-68470 /

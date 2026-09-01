@@ -206,7 +206,9 @@ docker compose up --build
 
 **Cause:** The service requires an authenticated invoker (Google identity). The frontend service account must have the `roles/run.invoker` role on the backend service.
 
-**Fix:** Check the Terraform IAM binding in `infrastructure/terraform/iam.tf`.
+**Fix:** In Google Cloud Console, open **Cloud Run > live-memories-backend > Permissions** and verify that the intended
+principals have the **Cloud Run Invoker** role. If the backend is public, verify that this is intentional and that write
+endpoints still require JWT authentication.
 
 ---
 

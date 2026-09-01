@@ -22,7 +22,7 @@ Identify and remediate security issues in every PR, with emphasis on OWASP Top 1
 - Review CORS, security headers, and rate limiting configuration.
 - Check that error responses do not leak internal details.
 - Verify that sensitive data is not logged.
-- Review Terraform changes for IAM over-privilege.
+- Review GCP Console IAM configuration for over-privilege.
 
 ## Constraints
 
@@ -44,7 +44,7 @@ Identify and remediate security issues in every PR, with emphasis on OWASP Top 1
 - [ ] Error responses do not expose stack traces or internal paths in production?
 - [ ] CORS origins explicitly configured (no `*` in production)?
 - [ ] Security headers middleware applied?
-- [ ] Service accounts follow least-privilege in Terraform?
+- [ ] Service accounts follow least privilege in GCP IAM?
 
 ## Expected inputs
 

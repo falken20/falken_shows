@@ -21,7 +21,7 @@
 - ♿ **Accesible** – WCAG 2.1 AA
 - 🔒 **Autenticación JWT** – preparada para múltiples usuarios
 - 🐳 **Docker Compose** para arrancar todo localmente con un solo comando
-- ☁️ **Preparado para Google Cloud Platform**: Cloud Run, Cloud SQL, Cloud Storage, Secret Manager, Terraform
+- ☁️ **Preparado para Google Cloud Platform**: Cloud Run, Cloud SQL, Cloud Storage, Secret Manager, Cloud Build
 
 ---
 
@@ -35,7 +35,7 @@
 | Testing BE | Pytest, pytest-cov, HTTPX, Faker |
 | Testing FE | Vitest, React Testing Library, MSW, Playwright |
 | Calidad | Ruff, Mypy, ESLint, Prettier, pre-commit |
-| Infra | Docker, Docker Compose, Terraform, Cloud Build, GitHub Actions |
+| Infra | Docker, Docker Compose, Cloud Build, GitHub Actions |
 | GCP | Cloud Run, Cloud SQL, Cloud Storage, Artifact Registry, Secret Manager |
 
 ---
@@ -71,26 +71,14 @@ live-memories/
 │   │   └── types/                # Tipos TypeScript
 │   └── e2e/                      # Tests Playwright
 ├── infrastructure/
-│   ├── terraform/                # IaC para GCP
 │   └── cloudbuild/               # Pipelines Cloud Build
 ├── docs/
 │   └── adr/                      # Architectural Decision Records
 ├── scripts/                      # Scripts de utilidad
 ├── docker-compose.yml
 ├── Makefile
-└── .env.example
+│   └── cloudbuild/               # Pipelines Cloud Build
 ```
-
----
-
-## Requisitos previos
-
-- [Python 3.12+](https://python.org)
-- [uv](https://docs.astral.sh/uv/) – gestor de paquetes Python (`pip install uv`)
-- [Node.js 20+](https://nodejs.org) y npm
-- [Docker](https://docker.com) y Docker Compose (opcional pero recomendado)
-- [Make](https://www.gnu.org/software/make/) (disponible en macOS/Linux)
-
 ---
 
 ## Instalación local sin Docker
@@ -104,6 +92,14 @@ cd live-memories
 
 ### 2. Copiar y configurar variables de entorno
 
+### Despliegue desde la consola GCP
+
+La infraestructura se configura manualmente desde la consola de Google Cloud.
+Consulta la [guía de despliegue en GCP](docs/DEPLOYMENT_GCP_CONSOLE.md) para crear los recursos, configurar secretos,
+conectar Cloud SQL y ejecutar el Job de migraciones.
+
+Después de crear los recursos una vez, Cloud Build se encarga de construir y publicar las imágenes, actualizar el Job de
+migraciones, ejecutarlo y desplegar las nuevas revisiones de Cloud Run.
 ```bash
 cp .env.example .env
 # Edita .env con tu editor preferido
@@ -314,29 +310,14 @@ make build
 
 ## Despliegue en GCP
 
-### Con Terraform
+### Despliegue desde la consola GCP
 
-```bash
-cd infrastructure/terraform
-terraform init
-terraform plan -var-file=terraform.tfvars
-terraform apply -var-file=terraform.tfvars
-```
+La infraestructura se configura manualmente desde la consola de Google Cloud.
+Consulta la [guía de despliegue en GCP](docs/DEPLOYMENT_GCP_CONSOLE.md) para crear los recursos, configurar secretos,
+conectar Cloud SQL y ejecutar el Job de migraciones.
 
-Ver [`infrastructure/terraform/terraform.tfvars.example`](infrastructure/terraform/terraform.tfvars.example).
-
-### Despliegue manual (Cloud Run)
-
-```bash
-gcloud auth configure-docker REGION-docker.pkg.dev
-docker build -t REGION-docker.pkg.dev/PROJECT_ID/live-memories/backend:latest backend/
-docker push REGION-docker.pkg.dev/PROJECT_ID/live-memories/backend:latest
-gcloud run deploy live-memories-backend \
-  --image REGION-docker.pkg.dev/PROJECT_ID/live-memories/backend:latest \
-  --region REGION \
-  --set-secrets="JWT_SECRET_KEY=jwt-secret:latest" \
-  --add-cloudsql-instances PROJECT_ID:REGION:INSTANCE_NAME
-```
+Después de crear los recursos una vez, Cloud Build se encarga de construir y publicar las imágenes, actualizar el Job de
+migraciones, ejecutarlo y desplegar las nuevas revisiones de Cloud Run.
 
 ---
 
@@ -345,7 +326,7 @@ gcloud run deploy live-memories-backend \
 Los workflows de GitHub Actions están en [`.github/workflows/`](.github/workflows/):
 
 - **`ci.yml`**: Ejecuta lint, typecheck, tests y construcción Docker en cada Pull Request
-- **Dependabot**: actualizaciones automáticas de Python, npm, Actions, Docker y Terraform
+- **Dependabot**: actualizaciones automáticas de Python, npm, Actions y Docker
 
 ---
 

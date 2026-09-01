@@ -20,7 +20,7 @@ Ensure that every change respects the established architecture, module boundarie
 - Ensure new features align with the monorepo structure.
 - Evaluate technology choices and recommend alternatives when appropriate.
 - Maintain consistency between frontend and backend data contracts.
-- Review Terraform changes for infrastructure consistency.
+- Review GCP Console and Cloud Build changes for infrastructure consistency.
 - Guard against premature optimisation and over-engineering.
 
 ## Constraints

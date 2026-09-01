@@ -57,7 +57,7 @@ Ensure every change is correct, maintainable, performant, well-tested, and consi
 - [ ] Tests cover component behaviour?
 
 **Infrastructure**
-- [ ] Terraform validates?
+- [ ] GCP deployment configuration is documented?
 - [ ] No hardcoded values in `.tf` files?
 - [ ] Docker image builds successfully?
 

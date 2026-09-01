@@ -42,7 +42,7 @@ Polyrepo was rejected because the synchronisation overhead between repos outweig
 live-memories/
 ├── backend/     # Python/FastAPI API
 ├── frontend/    # React/TypeScript SPA
-├── infrastructure/  # Terraform + Cloud Build
+├── infrastructure/  # Cloud Build
 ├── docs/        # Documentation and ADRs
 └── scripts/     # Utility scripts
 ```

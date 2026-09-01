@@ -1,8 +1,7 @@
 # Architecture
 
-Live Memories is a full-stack app for cataloguing personal concert history: a **FastAPI** backend, a **React + TypeScript** frontend, and **Google Cloud Platform** infrastructure provisioned with Terraform.
+Live Memories is a full-stack app for cataloguing personal concert history: a **FastAPI** backend, a **React + TypeScript** frontend, and **Google Cloud Platform** infrastructure configured through the GCP Console.
 
----
 
 ## System overview
 
@@ -43,7 +42,6 @@ graph TB
     class Frontend,Backend,SQL,GCS,SecretManager,ArtifactRegistry,VPC,CloudBuild gcp
 ```
 
----
 
 ## Backend – layered architecture
 
@@ -76,7 +74,6 @@ graph LR
 5. Repository issues an async SQLAlchemy `UPDATE` and re-fetches with eager-loaded relations.
 6. Response is serialised through `ConcertResponse` and returned as JSON.
 
----
 
 ## Frontend – component/data flow
 
@@ -93,7 +90,6 @@ graph TB
     Pages --> I18n["i18next<br/>es / en"]
 ```
 
----
 
 ## Deployment pipeline
 
@@ -111,7 +107,6 @@ sequenceDiagram
     CI->>CI: backend: ruff, mypy, pytest --cov
     CI->>CI: frontend: eslint, prettier, tsc, vitest, build
     CI->>CI: docker build (backend + frontend)
-    CI->>CI: terraform validate + fmt
     GH->>CB: trigger on push (separate pipeline)
     CB->>CB: run backend tests
     CB->>AR: build & push backend/frontend images (SHORT_SHA tag)
@@ -119,15 +114,8 @@ sequenceDiagram
     CB->>CR: run Alembic migrations job
 ```
 
----
 
 ## Security boundaries
 
-- **Backend Cloud Run service** is publicly invokable so browser clients can call the API directly; write operations remain protected by app-level JWT auth, explicit CORS, and rate limiting.
-- **Cloud SQL** has no public IP; reachable only via the VPC with enforced TLS (`ssl_mode = ENCRYPTED_ONLY`).
-- **Secrets** (JWT signing key, DB password, admin password) are injected as env vars from **Secret Manager** at container start — never baked into images.
-- **JWT auth**: all write endpoints (`POST`/`PUT`/`DELETE`) require a bearer token issued by `POST /api/v1/auth/token`; read endpoints (`GET`) are public.
-- **Rate limiting**: in-memory sliding window (120 req/60s per IP), bypassing `/health` and `/ready` so orchestrator probes are never throttled.
-- **Docs disabled in production**: `/docs`, `/redoc`, `/openapi.json` only exist when `APP_ENV != production`.
 
 See [SECURITY.md](../SECURITY.md) for the vulnerability disclosure process and [API.md](API.md) for the full endpoint reference.

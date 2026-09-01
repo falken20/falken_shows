@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     All settings can be overridden via environment variables (case-sensitive).
     Production deployments must supply strong secrets via Google Secret Manager
-    (see infrastructure/terraform/main.tf for secret_key_ref bindings).
+    (see docs/DEPLOYMENT_GCP_CONSOLE.md for the console setup).
 
     Security invariants enforced at startup:
         - CORS_ORIGINS may not be empty or contain ``'*'``.
