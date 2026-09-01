@@ -84,7 +84,3 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "passlib.*"
 ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "jose.*"
-ignore_missing_imports = true

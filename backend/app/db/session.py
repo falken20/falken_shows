@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import Engine, create_engine, event
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -28,7 +29,7 @@ def _get_async_url() -> str:
     - SQLite  → ``sqlite+aiosqlite://``
     - PostgreSQL → ``postgresql+asyncpg://``
     """
-    url = settings.DATABASE_URL
+    url = _inject_db_password(settings.DATABASE_URL)
     # Ensure proper async driver
     if "sqlite" in url and "+aiosqlite" not in url:
         url = url.replace("sqlite://", "sqlite+aiosqlite://", 1)
@@ -44,8 +45,23 @@ def _get_sync_url() -> str:
     Strips async driver prefixes (aiosqlite, asyncpg) so Alembic's synchronous
     engine can connect without installing additional drivers.
     """
-    url = settings.DATABASE_URL
+    url = _inject_db_password(settings.DATABASE_URL)
     return url.replace("+aiosqlite", "").replace("+asyncpg", "+psycopg2")
+
+
+def _inject_db_password(url: str) -> str:
+    if "postgresql" not in url or settings.DB_PASSWORD is None:
+        return url
+    parsed = make_url(url)
+    if parsed.password is not None:
+        return url
+    return parsed.set(password=settings.DB_PASSWORD).render_as_string(hide_password=False)
+
+
+def _enable_sqlite_fk(engine: Engine) -> None:
+    """Enable FK constraint enforcement for SQLite connections."""
+    if "sqlite" in str(engine.url):
+        event.listen(engine, "connect", lambda conn, _rec: conn.execute("PRAGMA foreign_keys=ON"))
 
 
 def _build_async_engine() -> AsyncEngine:
@@ -75,6 +91,7 @@ def _build_sync_engine() -> Engine:
 
 
 async_engine: AsyncEngine = _build_async_engine()
+_enable_sqlite_fk(async_engine.sync_engine)
 
 AsyncSessionLocal: async_sessionmaker[AsyncSession] = async_sessionmaker(
     bind=async_engine,
@@ -110,9 +127,3 @@ def create_db_and_tables() -> None:
     _enable_sqlite_fk(sync_engine)
     Base.metadata.create_all(bind=sync_engine)
     sync_engine.dispose()
-
-
-def _enable_sqlite_fk(engine: Engine) -> None:
-    """Enable FK constraint enforcement for SQLite connections."""
-    if "sqlite" in str(engine.url):
-        event.listen(engine, "connect", lambda conn, _rec: conn.execute("PRAGMA foreign_keys=ON"))

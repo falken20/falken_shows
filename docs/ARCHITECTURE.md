@@ -27,7 +27,7 @@ graph TB
     CloudBuild["Cloud Build<br/>build, test, deploy"]
 
     User -->|HTTPS| Frontend
-    Frontend -->|"/api/v1/* proxied"| Backend
+    User -->|"HTTPS /api/v1"| Backend
     Backend -->|"asyncpg, private IP"| SQL
     Backend -->|signed URLs| GCS
     Backend -.->|reads secrets at startup| SecretManager
@@ -123,7 +123,7 @@ sequenceDiagram
 
 ## Security boundaries
 
-- **Backend Cloud Run service** is *not* publicly invokable — only the frontend's service account has `roles/run.invoker`.
+- **Backend Cloud Run service** is publicly invokable so browser clients can call the API directly; write operations remain protected by app-level JWT auth, explicit CORS, and rate limiting.
 - **Cloud SQL** has no public IP; reachable only via the VPC with enforced TLS (`ssl_mode = ENCRYPTED_ONLY`).
 - **Secrets** (JWT signing key, DB password, admin password) are injected as env vars from **Secret Manager** at container start — never baked into images.
 - **JWT auth**: all write endpoints (`POST`/`PUT`/`DELETE`) require a bearer token issued by `POST /api/v1/auth/token`; read endpoints (`GET`) are public.

@@ -11,7 +11,7 @@ WORKDIR /build
 COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /usr/local/bin/uv
 
 # Copy dependency files
-COPY pyproject.toml uv.lock .
+COPY pyproject.toml uv.lock ./
 
 # Install dependencies into a virtual environment
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy

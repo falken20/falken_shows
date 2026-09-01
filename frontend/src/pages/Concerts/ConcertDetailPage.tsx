@@ -16,7 +16,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import DeleteIcon from '@mui/icons-material/Delete'
 import EditIcon from '@mui/icons-material/Edit'
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useConcert, useDeleteConcert } from '@/hooks/useConcerts'
 import { useAuth } from '@/hooks/useAuth'
@@ -34,12 +34,15 @@ export default function ConcertDetailPage() {
   const { isAuthenticated } = useAuth()
   const [deleteOpen, setDeleteOpen] = useState(false)
 
-  const numericId = parseInt(id ?? '', 10)
-  if (Number.isNaN(numericId)) {
-    void navigate('/404', { replace: true })
-  }
+  const parsedId = parseInt(id ?? '', 10)
+  const isInvalidId = Number.isNaN(parsedId)
+  const numericId = isInvalidId ? 0 : parsedId
   const { data: concert, isLoading, isError } = useConcert(numericId)
   const deleteMutation = useDeleteConcert()
+
+  if (isInvalidId) {
+    return <Navigate to="/404" replace />
+  }
 
   const handleDelete = () => {
     void deleteMutation.mutateAsync(numericId).then(() => {

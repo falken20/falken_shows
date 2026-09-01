@@ -54,6 +54,11 @@ variable "db_user" {
   default     = "live_memories"
 }
 
+variable "cors_origins" {
+  description = "Allowed browser origins for the backend CORS policy"
+  type        = list(string)
+}
+
 variable "vpc_network_id" {
   description = "VPC network self_link for Cloud SQL private IP"
   type        = string

@@ -8,7 +8,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.db.session import Base, get_db
+from app.db.session import Base, _enable_sqlite_fk, get_db
 from app.main import app
 
 # ── In-memory SQLite for tests ────────────────────────────────
@@ -18,6 +18,7 @@ TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 @pytest.fixture(scope="function")
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
     test_engine = create_async_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
+    _enable_sqlite_fk(test_engine.sync_engine)
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     TestSessionLocal = async_sessionmaker(bind=test_engine, expire_on_commit=False)

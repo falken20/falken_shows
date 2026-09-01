@@ -139,6 +139,7 @@ resource "google_storage_bucket" "uploads" {
   labels        = local.common_labels
 
   uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
 
   lifecycle_rule {
     condition {
@@ -153,7 +154,7 @@ resource "google_storage_bucket" "uploads" {
 
 resource "google_storage_bucket_iam_member" "backend_storage" {
   bucket = google_storage_bucket.uploads.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectUser"
   member = "serviceAccount:${google_service_account.backend.email}"
 }
 
@@ -177,6 +178,11 @@ resource "google_cloud_run_v2_service" "backend" {
       env {
         name  = "APP_ENV"
         value = var.environment
+      }
+
+      env {
+        name  = "CORS_ORIGINS"
+        value = join(",", var.cors_origins)
       }
 
       env {
@@ -270,13 +276,13 @@ resource "google_cloud_run_v2_service" "backend" {
   depends_on = [google_project_service.apis]
 }
 
-# Backend requires authentication – invoked only via frontend proxy or authenticated clients
-resource "google_cloud_run_v2_service_iam_member" "backend_invoker" {
+# Browser clients call the backend directly; write operations are protected by app-level JWT.
+resource "google_cloud_run_v2_service_iam_member" "backend_public" {
   project  = var.project_id
   location = var.region
   name     = google_cloud_run_v2_service.backend.name
   role     = "roles/run.invoker"
-  member   = "serviceAccount:${google_service_account.frontend.email}"
+  member   = "allUsers"
 }
 
 # ── Cloud Run – Frontend ──────────────────────────────────────

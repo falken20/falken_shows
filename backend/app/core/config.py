@@ -16,8 +16,8 @@ class Settings(BaseSettings):
 
     Security invariants enforced at startup:
         - CORS_ORIGINS may not be empty or contain ``'*'``.
-        - In production, JWT_SECRET_KEY must be ≥32 chars and not start with ``change-me``.
-        - In production, ADMIN_PASSWORD must be ≥12 chars and not start with ``change-me``.
+        - In staging/production, JWT_SECRET_KEY must be >=32 chars and not start with ``change-me``.
+        - In staging/production, ADMIN_PASSWORD must be >=12 chars and not start with ``change-me``.
         - ACCESS_TOKEN_EXPIRE_MINUTES must be in the range [1, 1440].
     """
 
@@ -30,7 +30,7 @@ class Settings(BaseSettings):
 
     # ── Application ────────────────────────────────────────────
     APP_NAME: str = "Live Memories"
-    APP_ENV: Literal["development", "testing", "production"] = "development"
+    APP_ENV: Literal["development", "testing", "staging", "production"] = "development"
     APP_DEBUG: bool = False
     APP_VERSION: str = "0.1.0"
 
@@ -41,6 +41,7 @@ class Settings(BaseSettings):
 
     # ── Database ───────────────────────────────────────────────
     DATABASE_URL: str = "sqlite+aiosqlite:///./data/live_memories.db"
+    DB_PASSWORD: str | None = None
 
     # ── JWT ────────────────────────────────────────────────────
     JWT_SECRET_KEY: str = "change-me-to-a-long-random-string-in-production"  # noqa: S105 – placeholder, must be overridden in production via env var
@@ -63,6 +64,7 @@ class Settings(BaseSettings):
 
     # ── CORS ───────────────────────────────────────────────────
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:4173"]
+    TRUST_PROXY_HEADERS: bool = False
 
     # ── Localisation ───────────────────────────────────────────
     DEFAULT_LANGUAGE: str = "es"
@@ -98,11 +100,15 @@ class Settings(BaseSettings):
         if "*" in self.CORS_ORIGINS:
             raise ValueError("CORS_ORIGINS cannot contain '*'")
 
-        if self.APP_ENV == "production":
+        if self.APP_ENV in {"staging", "production"}:
             if self.JWT_SECRET_KEY.startswith("change-me") or len(self.JWT_SECRET_KEY) < 32:
-                raise ValueError("JWT_SECRET_KEY must be overridden in production and have at least 32 characters")
+                raise ValueError(
+                    "JWT_SECRET_KEY must be overridden in staging/production and have at least 32 characters"
+                )
             if self.ADMIN_PASSWORD.startswith("change-me") or len(self.ADMIN_PASSWORD) < 12:
-                raise ValueError("ADMIN_PASSWORD must be overridden in production and have at least 12 characters")
+                raise ValueError(
+                    "ADMIN_PASSWORD must be overridden in staging/production and have at least 12 characters"
+                )
 
         return self
 

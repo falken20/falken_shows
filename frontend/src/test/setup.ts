@@ -4,7 +4,7 @@ import { server } from '../mocks/server'
 import '../i18n'
 
 // Establish API mocking before all tests
-beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }))
+beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 
 // Reset any request handlers that we may add during the tests
 afterEach(() => server.resetHandlers())

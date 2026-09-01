@@ -20,6 +20,7 @@
     "next": "Siguiente",
     "previous": "Anterior",
     "page": "Página",
+    "emptyValue": "—",
     "yes": "Sí",
     "no": "No",
     "noResults": "No hay resultados",
@@ -46,7 +47,10 @@
       "backHome": "Volver al inicio"
     },
     "generic": "Ha ocurrido un error inesperado",
-    "network": "Error de conexión con el servidor"
+    "network": "Error de conexión con el servidor",
+    "validation": {
+      "invalid": "Valor no válido"
+    }
   },
   "concerts": {
     "title": "Conciertos",

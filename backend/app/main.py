@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 from app.api.v1.router import api_router
+from app.core.client_ip import get_client_ip
 from app.core.config import settings
 from app.core.exceptions import AppError, app_error_handler
 from app.core.logging import configure_logging
@@ -31,11 +32,6 @@ _RATE_LIMIT_EXCLUDED_PATHS = {
     "/api/v1/ready",
 }
 
-# Login brute-force protection: track failed attempts per IP
-_login_attempts: dict[str, list[float]] = defaultdict(list)
-_LOGIN_MAX_ATTEMPTS = 10
-_LOGIN_WINDOW = 300  # 5 minutes
-
 
 @asynccontextmanager
 async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
@@ -50,7 +46,8 @@ async def lifespan(application: FastAPI) -> AsyncGenerator[None, None]:
     ``create_db_and_tables`` is effectively a no-op against PostgreSQL.
     """
     logger.info("startup app=%s version=%s env=%s", settings.APP_NAME, settings.APP_VERSION, settings.APP_ENV)
-    create_db_and_tables()
+    if "sqlite" in settings.DATABASE_URL:
+        create_db_and_tables()
     yield
     logger.info("shutdown")
 
@@ -59,9 +56,9 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     description="Personal concert inventory API",
-    docs_url="/docs" if settings.APP_ENV != "production" else None,
-    redoc_url="/redoc" if settings.APP_ENV != "production" else None,
-    openapi_url="/openapi.json" if settings.APP_ENV != "production" else None,
+    docs_url="/docs" if settings.APP_ENV not in {"staging", "production"} else None,
+    redoc_url="/redoc" if settings.APP_ENV not in {"staging", "production"} else None,
+    openapi_url="/openapi.json" if settings.APP_ENV not in {"staging", "production"} else None,
     lifespan=lifespan,
 )
 
@@ -94,9 +91,7 @@ async def rate_limit(request: Request, call_next: Callable[[Request], Awaitable[
     if request.url.path in _RATE_LIMIT_EXCLUDED_PATHS:
         return await call_next(request)
 
-    # Use X-Forwarded-For behind reverse proxies (Cloud Run, nginx)
-    forwarded = request.headers.get("x-forwarded-for")
-    client_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "unknown")
+    client_ip = get_client_ip(request)
     now = time.time()
     window_start = now - _RATE_LIMIT_WINDOW
 

@@ -20,6 +20,7 @@
     "next": "Next",
     "previous": "Previous",
     "page": "Page",
+    "emptyValue": "—",
     "yes": "Yes",
     "no": "No",
     "noResults": "No results found",
@@ -46,7 +47,10 @@
       "backHome": "Back to home"
     },
     "generic": "An unexpected error occurred",
-    "network": "Connection error with the server"
+    "network": "Connection error with the server",
+    "validation": {
+      "invalid": "Invalid value"
+    }
   },
   "concerts": {
     "title": "Concerts",

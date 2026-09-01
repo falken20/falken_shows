@@ -54,6 +54,29 @@ class TestAuthenticate:
         )
         assert response.status_code == 401
 
+    async def test_repeated_failed_logins_are_throttled(self, async_client: AsyncClient) -> None:
+        from app.services.auth_service import _LOGIN_MAX_ATTEMPTS, _failed_login_attempts
+
+        _failed_login_attempts.clear()
+        try:
+            for _ in range(_LOGIN_MAX_ATTEMPTS):
+                response = await async_client.post(
+                    "/api/v1/auth/token",
+                    data={"username": "admin@example.com", "password": "wrong-password"},
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                )
+                assert response.status_code == 401
+
+            response = await async_client.post(
+                "/api/v1/auth/token",
+                data={"username": "admin@example.com", "password": "wrong-password"},
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+            )
+            assert response.status_code == 429
+            assert response.json()["error"]["code"] == "RATE_LIMIT_EXCEEDED"
+        finally:
+            _failed_login_attempts.clear()
+
 
 class TestCreateConcertWithInvalidFK:
     """Verify that creating a concert with non-existent FK refs is rejected."""

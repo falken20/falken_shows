@@ -12,6 +12,21 @@ steps:
         uv run ruff check app tests
         uv run pytest --cov=app --cov-fail-under=80
 
+  # ── Frontend: Lint + Test + Build ────────────────────────────
+  - name: "node:24-alpine"
+    id: frontend-test
+    dir: frontend
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        npm ci
+        npm run lint
+        npm run format:check
+        npm run typecheck
+        npm run test:coverage
+        npm run build
+
   # ── Build backend Docker image ────────────────────────────────
   - name: "gcr.io/cloud-builders/docker"
     id: build-backend
@@ -32,6 +47,7 @@ steps:
       - --build-arg
       - "VITE_API_BASE_URL=${_BACKEND_URL}/api/v1"
       - ./frontend
+    waitFor: [frontend-test]
 
   # ── Push backend image ────────────────────────────────────────
   - name: "gcr.io/cloud-builders/docker"

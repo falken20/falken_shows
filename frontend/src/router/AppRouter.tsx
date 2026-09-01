@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { MainLayout } from '@/components/layout/MainLayout'
 
 // Lazy-load pages so each route's bundle is only fetched when first visited.
@@ -34,7 +34,7 @@ export default function AppRouter() {
         <Route path="/concerts/:id/edit" element={<ConcertFormPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
-      <Route path="/404" element={<Navigate to="/" replace />} />
+      <Route path="/404" element={<NotFoundPage />} />
     </Routes>
   )
 }

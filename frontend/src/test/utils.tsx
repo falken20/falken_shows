@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { createAppTheme } from '@/utils/theme'
+import { AuthProvider } from '@/hooks/useAuth'
 
 /**
  * Create an isolated `QueryClient` for each test.
@@ -36,7 +37,9 @@ function AppProviders({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <BrowserRouter>{children}</BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>{children}</BrowserRouter>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   )

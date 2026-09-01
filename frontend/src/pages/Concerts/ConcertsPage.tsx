@@ -13,7 +13,7 @@ import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
 import AddIcon from '@mui/icons-material/Add'
 import { useState } from 'react'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useConcerts } from '@/hooks/useConcerts'
 import { useAuth } from '@/hooks/useAuth'
@@ -26,7 +26,6 @@ import { useAuth } from '@/hooks/useAuth'
  */
 export default function ConcertsPage() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const [page, setPage] = useState(1)
   const PAGE_SIZE = 20
@@ -90,23 +89,17 @@ export default function ConcertsPage() {
             </TableHead>
             <TableBody>
               {data.items.map(concert => (
-                <TableRow
-                  key={concert.id}
-                  hover
-                  sx={{ cursor: 'pointer' }}
-                  onClick={() => {
-                    void navigate(`/concerts/${concert.id}`)
-                  }}
-                  tabIndex={0}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' || e.key === ' ') void navigate(`/concerts/${concert.id}`)
-                  }}
-                  aria-label={concert.title}
-                >
-                  <TableCell>{concert.title}</TableCell>
-                  <TableCell>{concert.artist?.name ?? '—'}</TableCell>
+                <TableRow key={concert.id} hover>
                   <TableCell>
-                    {concert.venue ? `${concert.venue.name}, ${concert.venue.city}` : '—'}
+                    <Button component={RouterLink} to={`/concerts/${concert.id}`} sx={{ px: 0 }}>
+                      {concert.title}
+                    </Button>
+                  </TableCell>
+                  <TableCell>{concert.artist?.name ?? t('common.emptyValue')}</TableCell>
+                  <TableCell>
+                    {concert.venue
+                      ? `${concert.venue.name}, ${concert.venue.city}`
+                      : t('common.emptyValue')}
                   </TableCell>
                   <TableCell>{concert.date}</TableCell>
                   <TableCell>
@@ -118,7 +111,7 @@ export default function ConcertsPage() {
                         aria-label={`${concert.rating}/5`}
                       />
                     ) : (
-                      '—'
+                      t('common.emptyValue')
                     )}
                   </TableCell>
                 </TableRow>

@@ -74,3 +74,13 @@ def test_production_requires_strong_admin_password_when_jwt_is_strong() -> None:
             JWT_SECRET_KEY="a-very-strong-secret-key-longer-than-32-chars",
             ADMIN_PASSWORD="change-me",
         )
+
+
+def test_staging_is_valid_environment() -> None:
+    settings = Settings(
+        APP_ENV="staging",
+        JWT_SECRET_KEY="a-very-strong-secret-key-longer-than-32-chars",
+        ADMIN_PASSWORD="strong-admin-password-12",
+        CORS_ORIGINS=["https://staging.livememories.app"],
+    )
+    assert settings.APP_ENV == "staging"

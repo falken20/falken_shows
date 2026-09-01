@@ -8,25 +8,29 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { useConcert, useCreateConcert, useUpdateConcert } from '@/hooks/useConcerts'
 import { useArtists } from '@/hooks/useArtists'
 import { useVenues } from '@/hooks/useVenues'
 import { useAuth } from '@/hooks/useAuth'
 
-interface ConcertFormValues {
-  title: string
-  date: string
-  artist_id: number | null
-  venue_id: number | null
-  rating: number | null
-  notes: string
-  ticket_price: number | null
-  currency: string
-}
+const concertFormSchema = z.object({
+  title: z.string().min(1).max(255),
+  date: z.string().min(1),
+  artist_id: z.number().int().positive().nullable(),
+  venue_id: z.number().int().positive().nullable(),
+  rating: z.number().int().min(1).max(5).nullable(),
+  notes: z.string().max(10000),
+  ticket_price: z.number().min(0).nullable(),
+  currency: z.string().length(3),
+})
+
+type ConcertFormValues = z.infer<typeof concertFormSchema>
 
 function normalizeDateForInput(value: string): string {
   if (value.includes('T')) {
@@ -55,10 +59,9 @@ export default function ConcertFormPage() {
   const { isAuthenticated } = useAuth()
 
   const isEditing = id !== undefined
-  const numericId = isEditing ? parseInt(id, 10) : 0
-  if (isEditing && Number.isNaN(numericId)) {
-    void navigate('/404', { replace: true })
-  }
+  const parsedId = isEditing ? parseInt(id, 10) : 0
+  const isInvalidEditId = isEditing && Number.isNaN(parsedId)
+  const numericId = isInvalidEditId ? 0 : parsedId
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -80,6 +83,7 @@ export default function ConcertFormPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<ConcertFormValues>({
+    resolver: zodResolver(concertFormSchema),
     defaultValues: {
       title: '',
       date: '',
@@ -124,6 +128,10 @@ export default function ConcertFormPage() {
   }
 
   const mutationError = createMutation.error ?? updateMutation.error
+
+  if (isInvalidEditId) {
+    return <Navigate to="/404" replace />
+  }
 
   if (isEditing && loadingConcert) {
     return (
@@ -221,7 +229,7 @@ export default function ConcertFormPage() {
                     field.onChange(e.target.value === '' ? null : Number(e.target.value))
                   }
                 >
-                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="">{t('common.emptyValue')}</MenuItem>
                   {artistsData?.items.map(a => (
                     <MenuItem key={a.id} value={a.id}>
                       {a.name}
@@ -246,7 +254,7 @@ export default function ConcertFormPage() {
                     field.onChange(e.target.value === '' ? null : Number(e.target.value))
                   }
                 >
-                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="">{t('common.emptyValue')}</MenuItem>
                   {venuesData?.items.map(v => (
                     <MenuItem key={v.id} value={v.id}>
                       {v.name}, {v.city}
@@ -271,7 +279,7 @@ export default function ConcertFormPage() {
                     field.onChange(e.target.value === '' ? null : Number(e.target.value))
                   }
                 >
-                  <MenuItem value="">—</MenuItem>
+                  <MenuItem value="">{t('common.emptyValue')}</MenuItem>
                   {[1, 2, 3, 4, 5].map(n => (
                     <MenuItem key={n} value={n}>
                       {n}
@@ -296,6 +304,8 @@ export default function ConcertFormPage() {
                     onChange={e =>
                       field.onChange(e.target.value === '' ? null : Number(e.target.value))
                     }
+                    error={Boolean(errors.ticket_price)}
+                    helperText={errors.ticket_price ? t('errors.validation.invalid') : undefined}
                     inputProps={{ min: 0, step: 0.01 }}
                   />
                 )}
@@ -308,6 +318,8 @@ export default function ConcertFormPage() {
                     {...field}
                     label={t('concerts.form.currency')}
                     sx={{ width: 120 }}
+                    error={Boolean(errors.currency)}
+                    helperText={errors.currency ? t('errors.validation.invalid') : undefined}
                     inputProps={{ maxLength: 3, 'aria-label': t('concerts.form.currency') }}
                   />
                 )}
