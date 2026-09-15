@@ -14,10 +14,9 @@ from sqlalchemy.engine import Connection
 # Import models to populate Base.metadata
 import app.models  # noqa: F401
 from alembic import context
-from app.core.config import settings
 
 # Import all models so Alembic can detect them
-from app.db.session import Base, _inject_db_password  # noqa: F401 – registers metadata
+from app.db.session import Base, _get_sync_url  # noqa: F401 – registers metadata
 
 config = context.config
 
@@ -29,8 +28,7 @@ target_metadata = Base.metadata
 
 def get_sync_url() -> str:
     """Convert async database URL to sync URL for Alembic."""
-    url = _inject_db_password(settings.DATABASE_URL)
-    return url.replace("+aiosqlite", "").replace("+asyncpg", "+psycopg2")
+    return _get_sync_url().render_as_string(hide_password=False)
 
 
 def run_migrations_offline() -> None:

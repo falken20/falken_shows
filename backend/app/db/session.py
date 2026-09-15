@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import Engine, create_engine, event
-from sqlalchemy.engine import make_url
+from sqlalchemy.engine import URL, make_url
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -23,39 +23,42 @@ class Base(DeclarativeBase):
     """
 
 
-def _get_async_url() -> str:
+def _inject_db_password(url: str) -> URL:
+    """Return a SQLAlchemy URL, injecting ``DB_PASSWORD`` when PostgreSQL has none.
+
+    The URL object is passed to the engine so the password is not rendered into
+    a loggable connection string.
+    """
+    parsed = make_url(url)
+    if "postgresql" not in url or settings.DB_PASSWORD is None:
+        return parsed
+    if parsed.password is not None:
+        return parsed
+    return parsed.set(password=settings.DB_PASSWORD)
+
+
+def _get_async_url() -> URL:
     """Ensure DATABASE_URL uses the correct async driver prefix.
 
     - SQLite  → ``sqlite+aiosqlite://``
     - PostgreSQL → ``postgresql+asyncpg://``
     """
-    url = _inject_db_password(settings.DATABASE_URL)
-    # Ensure proper async driver
-    if "sqlite" in url and "+aiosqlite" not in url:
-        url = url.replace("sqlite://", "sqlite+aiosqlite://", 1)
-    if "postgresql" in url and "+asyncpg" not in url:
-        url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
-        url = url.replace("postgresql+psycopg2://", "postgresql+asyncpg://", 1)
-    return url
+    parsed = _inject_db_password(settings.DATABASE_URL)
+    driver = parsed.drivername
+    if "sqlite" in driver and "+aiosqlite" not in driver:
+        parsed = parsed.set(drivername="sqlite+aiosqlite")
+    if "postgresql" in driver and "+asyncpg" not in driver:
+        parsed = parsed.set(drivername="postgresql+asyncpg")
+    return parsed
 
 
-def _get_sync_url() -> str:
-    """Return a sync-driver URL for Alembic migrations and ``create_db_and_tables``.
-
-    Strips async driver prefixes (aiosqlite, asyncpg) so Alembic's synchronous
-    engine can connect without installing additional drivers.
-    """
-    url = _inject_db_password(settings.DATABASE_URL)
-    return url.replace("+aiosqlite", "").replace("+asyncpg", "+psycopg2")
-
-
-def _inject_db_password(url: str) -> str:
-    if "postgresql" not in url or settings.DB_PASSWORD is None:
-        return url
-    parsed = make_url(url)
-    if parsed.password is not None:
-        return url
-    return parsed.set(password=settings.DB_PASSWORD).render_as_string(hide_password=False)
+def _get_sync_url() -> URL:
+    """Return a sync-driver URL for Alembic migrations and ``create_db_and_tables``."""
+    parsed = _inject_db_password(settings.DATABASE_URL)
+    driver = parsed.drivername.replace("+aiosqlite", "").replace("+asyncpg", "+psycopg2")
+    if driver == "postgresql":
+        driver = "postgresql+psycopg2"
+    return parsed.set(drivername=driver)
 
 
 def _enable_sqlite_fk(engine: Engine) -> None:
@@ -72,22 +75,18 @@ def _build_async_engine() -> AsyncEngine:
     """
     async_url = _get_async_url()
     connect_args: dict[str, object] = {}
-    if "sqlite" in async_url:
+    if "sqlite" in async_url.drivername:
         connect_args["check_same_thread"] = False
-    return create_async_engine(async_url, echo=settings.APP_DEBUG, connect_args=connect_args)
+    return create_async_engine(async_url, echo=settings.sql_echo, connect_args=connect_args)
 
 
 def _build_sync_engine() -> Engine:
-    """Build a synchronous engine for DDL operations (create/drop tables).
-
-    Not used at runtime – only called by ``create_db_and_tables`` during
-    application startup in development and by test teardown.
-    """
+    """Build a synchronous engine for DDL operations (create/drop tables)."""
     sync_url = _get_sync_url()
     connect_args: dict[str, object] = {}
-    if sync_url.startswith("sqlite"):
+    if sync_url.drivername.startswith("sqlite"):
         connect_args["check_same_thread"] = False
-    return create_engine(sync_url, echo=settings.APP_DEBUG, connect_args=connect_args)
+    return create_engine(sync_url, echo=settings.sql_echo, connect_args=connect_args)
 
 
 async_engine: AsyncEngine = _build_async_engine()

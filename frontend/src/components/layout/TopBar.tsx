@@ -6,9 +6,10 @@ import Typography from '@mui/material/Typography'
 import Brightness4Icon from '@mui/icons-material/Brightness4'
 import Brightness7Icon from '@mui/icons-material/Brightness7'
 import MusicNoteIcon from '@mui/icons-material/MusicNote'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useThemeMode } from '@/hooks/useThemeMode'
+import { useAuth } from '@/hooks/useAuth'
 
 /**
  * Sticky application header displayed on every page inside {@link MainLayout}.
@@ -25,6 +26,8 @@ import { useThemeMode } from '@/hooks/useThemeMode'
 export function TopBar() {
   const { t } = useTranslation()
   const { mode, toggleMode } = useThemeMode()
+  const { isAuthenticated, logout } = useAuth()
+  const navigate = useNavigate()
 
   return (
     <AppBar position="sticky" elevation={1}>
@@ -51,6 +54,21 @@ export function TopBar() {
         >
           {t('concerts.nav')}
         </Button>
+        {isAuthenticated ? (
+          <Button
+            color="inherit"
+            onClick={() => {
+              void logout().then(() => navigate('/login'))
+            }}
+            aria-label={t('auth.logout')}
+          >
+            {t('auth.logout')}
+          </Button>
+        ) : (
+          <Button component={RouterLink} to="/login" color="inherit" aria-label={t('auth.login')}>
+            {t('auth.login')}
+          </Button>
+        )}
         <IconButton
           color="inherit"
           onClick={toggleMode}

@@ -29,6 +29,9 @@ const concert = {
 }
 
 test('concert list navigates to detail', async ({ page }) => {
+  await page.addInitScript(() => {
+    sessionStorage.setItem('live-memories-token', 'e2e-token')
+  })
   await page.route('**/api/v1/concerts?page=1&page_size=20', async route => {
     await route.fulfill({
       json: { items: [concert], total: 1, page: 1, page_size: 20, pages: 1 },

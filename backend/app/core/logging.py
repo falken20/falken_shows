@@ -1,9 +1,34 @@
 from __future__ import annotations
 
 import logging
+import re
 import sys
 
 from app.core.config import settings
+
+_SECRET_PATTERNS = (
+    re.compile(r"(?i)(password|passwd|secret|token|authorization)\s*[=:]\s*\S+"),
+    re.compile(r"(?i)(bearer\s+)[A-Za-z0-9._\-]+"),
+)
+
+
+def redact_secrets(message: str) -> str:
+    """Mask credential-like values before they are written to logs."""
+    redacted = message
+    redacted = _SECRET_PATTERNS[0].sub(lambda m: f"{m.group(1)}=***", redacted)
+    redacted = _SECRET_PATTERNS[1].sub(r"\1***", redacted)
+    return redacted
+
+
+class _RedactingFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord) -> str:
+        original = record.msg
+        record.msg = redact_secrets(record.getMessage())
+        record.args = ()
+        try:
+            return super().format(record)
+        finally:
+            record.msg = original
 
 
 def configure_logging() -> None:
@@ -33,15 +58,15 @@ def configure_logging() -> None:
                     "timestamp": self.formatTime(record, "%Y-%m-%dT%H:%M:%S"),
                     "level": record.levelname,
                     "logger": record.name,
-                    "message": record.getMessage(),
+                    "message": redact_secrets(record.getMessage()),
                 }
                 if record.exc_info:
-                    log_entry["exception"] = self.formatException(record.exc_info)
+                    log_entry["exception"] = redact_secrets(self.formatException(record.exc_info))
                 return json.dumps(log_entry)
 
         formatter = JsonFormatter()
     else:
-        formatter = logging.Formatter(
+        formatter = _RedactingFormatter(
             fmt="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
         )

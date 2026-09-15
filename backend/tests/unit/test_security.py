@@ -18,7 +18,11 @@ class TestProductionDocsDisabled:
     def test_docs_enabled_in_development(self) -> None:
         from app.core.config import Settings
 
-        settings = Settings(APP_ENV="development")
+        settings = Settings(
+            APP_ENV="development",
+            JWT_SECRET_KEY="a-very-strong-secret-key-longer-than-32-chars",
+            ADMIN_PASSWORD="strong-admin-password-12",
+        )
         assert settings.APP_ENV != "production"
 
 
@@ -37,7 +41,11 @@ class TestCorsCredentials:
     def test_credentials_enabled_in_development(self) -> None:
         from app.core.config import Settings
 
-        settings = Settings(APP_ENV="development")
+        settings = Settings(
+            APP_ENV="development",
+            JWT_SECRET_KEY="a-very-strong-secret-key-longer-than-32-chars",
+            ADMIN_PASSWORD="strong-admin-password-12",
+        )
         assert (settings.APP_ENV not in ("production", "staging")) is True
 
 

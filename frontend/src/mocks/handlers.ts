@@ -17,9 +17,6 @@ export const handlers = [
   http.get(`${API_BASE}/health`, () => {
     return HttpResponse.json({
       status: 'ok',
-      app_name: 'Live Memories',
-      version: '0.1.0',
-      environment: 'testing',
     })
   }),
 
@@ -34,6 +31,8 @@ export const handlers = [
   http.post(`${API_BASE}/auth/token`, () => {
     return HttpResponse.json({ access_token: 'mock-jwt-token', token_type: 'bearer' })
   }),
+
+  http.post(`${API_BASE}/auth/logout`, () => new HttpResponse(null, { status: 204 })),
 
   // Artists
   http.get(`${API_BASE}/artists`, () => {

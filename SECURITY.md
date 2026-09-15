@@ -51,11 +51,13 @@ Only the latest version receives security updates.
 
 ## Known security controls
 
-- JWT-based authentication with configurable expiry.
-- Bcrypt password hashing.
+- JWT authentication (HS256) with `iss`/`aud`/`jti`, admin `sub` check, and server-side logout revocation.
+- Bcrypt password hashing with constant-time login comparison.
+- Database-backed login lockout (shared across replicas) and per-process API rate limiting.
+- All concert/artist/venue endpoints require a valid access token.
 - Strict Pydantic input validation on all endpoints.
-- CORS restricted to configured origins.
-- File upload validation (type, size) with Pillow verification.
-- Security headers (HSTS, X-Frame-Options, X-Content-Type-Options) via middleware.
-- No sensitive data in logs (passwords, tokens are masked).
-- Audit log for create, update, and delete operations.
+- CORS restricted to configured origins; wildcard origins are rejected.
+- File upload validation is required before any upload endpoint is added (MIME via Pillow, size limit, UUID filenames, storage outside the web root).
+- Security headers (HSTS in staging/production, X-Frame-Options, X-Content-Type-Options, CSP, Cache-Control: no-store).
+- Log redaction for password/token-like values.
+- Audit log lines for create, update, and delete (`action`, `resource`, `id`, `actor`).

@@ -1,6 +1,15 @@
 import userEvent from '@testing-library/user-event'
 import { renderWithProviders, screen, waitFor } from '@/test/utils'
 import ConcertsPage from './ConcertsPage'
+import { TOKEN_KEY } from '@/hooks/useAuth'
+
+beforeEach(() => {
+  sessionStorage.setItem(TOKEN_KEY, 'mock-jwt-token')
+})
+
+afterEach(() => {
+  sessionStorage.clear()
+})
 
 it('renders concerts returned by the API', async () => {
   renderWithProviders(<ConcertsPage />)

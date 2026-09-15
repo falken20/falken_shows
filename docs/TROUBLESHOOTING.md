@@ -46,18 +46,19 @@ pydantic_core._pydantic_core.ValidationError:
   JWT_SECRET_KEY must be at least 32 characters in production
 ```
 
-**Cause:** `APP_ENV=production` requires a strong secret key.
+**Cause:** Outside `APP_ENV=testing`, `JWT_SECRET_KEY` must not start with `change-me` and must be at least 32 characters.
 
 **Fix:** Set a 32+ character random string in your `.env` file:
 ```bash
 # Generate a strong key
-python -c "import secrets; print(secrets.token_hex(32))"
+python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
 Then update `.env`:
 ```
 JWT_SECRET_KEY=<generated-key>
-APP_ENV=development  # or production with a strong key
+ADMIN_PASSWORD=<strong password of 12+ characters>
+APP_ENV=development
 ```
 
 ---

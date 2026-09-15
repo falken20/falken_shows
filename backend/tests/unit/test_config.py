@@ -57,9 +57,14 @@ def test_cors_origins_must_not_be_empty() -> None:
         Settings(CORS_ORIGINS=[])
 
 
-def test_production_requires_strong_jwt_secret() -> None:
+def test_development_requires_strong_jwt_secret() -> None:
     with pytest.raises(ValidationError):
-        Settings(APP_ENV="production", JWT_SECRET_KEY="change-me")
+        Settings(APP_ENV="development", JWT_SECRET_KEY="change-me")
+
+
+def test_jwt_algorithm_must_be_hs256() -> None:
+    with pytest.raises(ValidationError):
+        Settings(APP_ENV="testing", JWT_ALGORITHM="none")  # type: ignore[arg-type]
 
 
 def test_production_requires_strong_admin_password() -> None:

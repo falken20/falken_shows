@@ -25,11 +25,4 @@ describe('HomePage', () => {
       expect(screen.getByText('OK')).toBeInTheDocument()
     })
   })
-
-  it('shows app version information', async () => {
-    renderWithProviders(<HomePage />)
-    await waitFor(() => {
-      expect(screen.getByText(/v0\.1\.0/i)).toBeInTheDocument()
-    })
-  })
 })

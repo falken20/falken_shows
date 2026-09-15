@@ -9,13 +9,13 @@ Live Memories REST API – version `v1`.
 
 ## Authentication
 
-The API uses **JWT Bearer tokens**. Obtain a token via `POST /auth/token` and include it in the `Authorization` header for all write operations.
+The API uses **JWT Bearer tokens**. Obtain a token via `POST /auth/token` and include it in the `Authorization` header for **all** inventory endpoints (GET included). `POST /auth/logout` revokes the current token.
 
 ```
 Authorization: Bearer <token>
 ```
 
-Read endpoints (GET) are public. Write endpoints (POST, PUT, DELETE) require authentication.
+`GET /health` is public. `GET /ready` is public but rate-limited.
 
 ---
 
@@ -77,10 +77,7 @@ Liveness probe. Returns immediately without touching the database.
 **Response 200:**
 ```json
 {
-  "status": "ok",
-  "app_name": "Live Memories",
-  "version": "0.1.0",
-  "environment": "development"
+  "status": "ok"
 }
 ```
 
@@ -88,7 +85,7 @@ Liveness probe. Returns immediately without touching the database.
 
 #### `GET /ready`
 
-Readiness probe. Checks database connectivity.
+Readiness probe. Checks database connectivity. Rate-limited.
 
 **Response 200:**
 ```json
@@ -98,10 +95,10 @@ Readiness probe. Checks database connectivity.
 }
 ```
 
-**Response 200** (database unavailable – always returns 200 with parseable body for orchestrators):
+**Response 503** (database unavailable):
 ```json
 {
-  "status": "degraded",
+  "status": "error",
   "database": "error"
 }
 ```
@@ -129,13 +126,19 @@ username=admin@example.com&password=<admin_password>
 
 **Response 401:** Invalid credentials.
 
+#### `POST /auth/logout`
+
+Revoke the current access token. Requires `Authorization: Bearer`.
+
+**Response 204:** Token revoked.
+
 ---
 
 ### Artists
 
 #### `GET /artists`
 
-List all artists (paginated, public).
+List all artists (paginated). Requires authentication.
 
 **Query params:** `page`, `page_size`
 
@@ -162,7 +165,7 @@ List all artists (paginated, public).
 
 #### `GET /artists/{artist_id}`
 
-Get a single artist by ID (public).
+Get a single artist by ID. Requires authentication.
 
 **Response 200:** `ArtistResponse`
 **Response 404:** `ARTIST_NOT_FOUND`
@@ -225,8 +228,8 @@ Same CRUD pattern as Artists, with the following fields:
 | `capacity` | integer | ❌ | Maximum audience capacity |
 
 **Endpoints:**
-- `GET /venues` – list (public)
-- `GET /venues/{id}` – detail (public)
+- `GET /venues` – list (authenticated)
+- `GET /venues/{id}` – detail (authenticated)
 - `POST /venues` – create (auth required)
 - `PUT /venues/{id}` – update (auth required)
 - `DELETE /venues/{id}` – delete (auth required)
@@ -237,7 +240,7 @@ Same CRUD pattern as Artists, with the following fields:
 
 #### `GET /concerts`
 
-List all concerts (paginated, public). Returns full artist and venue objects embedded.
+List all concerts (paginated). Requires authentication. Returns full artist and venue objects embedded.
 
 **Response 200:**
 ```json
@@ -269,7 +272,7 @@ List all concerts (paginated, public). Returns full artist and venue objects emb
 
 #### `GET /concerts/{concert_id}`
 
-Get a single concert by ID (public).
+Get a single concert by ID. Requires authentication.
 
 **Response 200:** `ConcertResponse`
 **Response 404:** `CONCERT_NOT_FOUND`

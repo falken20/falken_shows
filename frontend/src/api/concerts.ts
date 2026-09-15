@@ -25,6 +25,7 @@ export const authApi = {
       })
       .then(r => r.data)
   },
+  logout: (): Promise<void> => apiClient.post('/auth/logout').then(() => undefined),
 }
 
 /** Artist CRUD endpoints (token attached by Axios interceptor) */

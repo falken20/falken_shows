@@ -17,10 +17,11 @@ _service = VenueService()
 @router.get("", response_model=PaginatedResponse[VenueResponse])
 async def list_venues(
     db: Annotated[AsyncSession, Depends(get_db)],
+    _user: Annotated[dict[str, Any], Depends(get_current_user)],
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 ) -> PaginatedResponse[VenueResponse]:
-    """List all venues (public)."""
+    """List all venues. Requires authentication."""
     return await _service.list_venues(db, page=page, page_size=page_size)
 
 
@@ -28,18 +29,19 @@ async def list_venues(
 async def create_venue(
     data: VenueCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
-    _user: Annotated[dict[str, Any], Depends(get_current_user)],
+    user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> VenueResponse:
     """Create a new venue. Requires authentication."""
-    return await _service.create_venue(db, data)
+    return await _service.create_venue(db, data, actor=str(user["sub"]))
 
 
 @router.get("/{venue_id}", response_model=VenueResponse)
 async def get_venue(
     venue_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
+    _user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> VenueResponse:
-    """Retrieve a single venue by ID (public)."""
+    """Retrieve a single venue by ID. Requires authentication."""
     return await _service.get_venue(db, venue_id)
 
 
@@ -48,17 +50,17 @@ async def update_venue(
     venue_id: int,
     data: VenueUpdate,
     db: Annotated[AsyncSession, Depends(get_db)],
-    _user: Annotated[dict[str, Any], Depends(get_current_user)],
+    user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> VenueResponse:
     """Update a venue. Requires authentication."""
-    return await _service.update_venue(db, venue_id, data)
+    return await _service.update_venue(db, venue_id, data, actor=str(user["sub"]))
 
 
 @router.delete("/{venue_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
 async def delete_venue(
     venue_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
-    _user: Annotated[dict[str, Any], Depends(get_current_user)],
+    user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> None:
     """Delete a venue. Requires authentication."""
-    await _service.delete_venue(db, venue_id)
+    await _service.delete_venue(db, venue_id, actor=str(user["sub"]))

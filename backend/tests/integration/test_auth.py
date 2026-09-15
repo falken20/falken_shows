@@ -55,27 +55,42 @@ class TestAuthenticate:
         assert response.status_code == 401
 
     async def test_repeated_failed_logins_are_throttled(self, async_client: AsyncClient) -> None:
-        from app.services.auth_service import _LOGIN_MAX_ATTEMPTS, _failed_login_attempts
+        from app.services.auth_service import _LOGIN_MAX_ATTEMPTS
 
-        _failed_login_attempts.clear()
-        try:
-            for _ in range(_LOGIN_MAX_ATTEMPTS):
-                response = await async_client.post(
-                    "/api/v1/auth/token",
-                    data={"username": "admin@example.com", "password": "wrong-password"},
-                    headers={"Content-Type": "application/x-www-form-urlencoded"},
-                )
-                assert response.status_code == 401
-
+        for _ in range(_LOGIN_MAX_ATTEMPTS):
             response = await async_client.post(
                 "/api/v1/auth/token",
                 data={"username": "admin@example.com", "password": "wrong-password"},
                 headers={"Content-Type": "application/x-www-form-urlencoded"},
             )
-            assert response.status_code == 429
-            assert response.json()["error"]["code"] == "RATE_LIMIT_EXCEEDED"
-        finally:
-            _failed_login_attempts.clear()
+            assert response.status_code == 401
+
+        response = await async_client.post(
+            "/api/v1/auth/token",
+            data={"username": "admin@example.com", "password": "wrong-password"},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        assert response.status_code == 429
+        assert response.json()["error"]["code"] == "RATE_LIMIT_EXCEEDED"
+
+    async def test_rejects_token_for_non_admin_subject(self, async_client: AsyncClient) -> None:
+        from app.core.security import create_access_token
+
+        token = create_access_token({"sub": "other@example.com"})
+        response = await async_client.post(
+            "/api/v1/artists",
+            json={"name": "Should Not Be Created"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == 401
+
+    async def test_logout_revokes_token(self, async_client: AsyncClient, auth_token: str) -> None:
+        headers = {"Authorization": f"Bearer {auth_token}"}
+        response = await async_client.post("/api/v1/auth/logout", headers=headers)
+        assert response.status_code == 204
+
+        response = await async_client.get("/api/v1/artists", headers=headers)
+        assert response.status_code == 401
 
 
 class TestCreateConcertWithInvalidFK:

@@ -15,8 +15,7 @@ import { useHealth } from '@/hooks/useHealth'
  * card that polls `GET /api/v1/health` via {@link useHealth} and displays:
  * - A loading spinner while the request is in flight.
  * - An error alert if the backend is unreachable.
- * - The API status chip (`ok` / `degraded`), app version, and environment
- *   once the response arrives.
+ * - The API liveness status once the response arrives.
  */
 export default function HomePage() {
   const { t } = useTranslation()
@@ -76,13 +75,7 @@ export default function HomePage() {
                 size="small"
                 aria-label={`${t('home.apiStatus.status')}: ${data.status}`}
               />
-              <Typography variant="body2" color="text.secondary">
-                {data.app_name} v{data.version}
-              </Typography>
             </Box>
-            <Typography variant="caption" color="text.secondary">
-              {t('home.apiStatus.environment')}: {data.environment}
-            </Typography>
           </Box>
         )}
       </Paper>

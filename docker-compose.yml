@@ -21,7 +21,7 @@ services:
       - STORAGE_BACKEND=local
       - LOCAL_STORAGE_PATH=./data/uploads
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - backend_data:/app/data
     networks:
@@ -43,7 +43,7 @@ services:
     environment:
       - VITE_API_BASE_URL=http://localhost:8000/api/v1
     ports:
-      - "80:80"
+      - "127.0.0.1:80:80"
     networks:
       - lm-network
     depends_on:
@@ -87,7 +87,7 @@ services:
       - STORAGE_BACKEND=local
       - LOCAL_STORAGE_PATH=./data/uploads
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8001:8000"
     volumes:
       - backend_data:/app/data
     networks:

@@ -16,9 +16,10 @@ class Settings(BaseSettings):
 
     Security invariants enforced at startup:
         - CORS_ORIGINS may not be empty or contain ``'*'``.
-        - In staging/production, JWT_SECRET_KEY must be >=32 chars and not start with ``change-me``.
-        - In staging/production, ADMIN_PASSWORD must be >=12 chars and not start with ``change-me``.
+        - Outside ``testing``, JWT_SECRET_KEY must be >=32 chars and not start with ``change-me``.
+        - Outside ``testing``, ADMIN_PASSWORD must be >=12 chars and not start with ``change-me``.
         - ACCESS_TOKEN_EXPIRE_MINUTES must be in the range [1, 1440].
+        - JWT_ALGORITHM must be HS256.
     """
 
     model_config = SettingsConfigDict(
@@ -35,7 +36,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "0.1.0"
 
     # ── Server ─────────────────────────────────────────────────
-    BACKEND_HOST: str = "0.0.0.0"  # noqa: S104 – intentional dev default, overridden via env var
+    BACKEND_HOST: str = "0.0.0.0"  # noqa: S104 – intentional bind inside the container
     BACKEND_PORT: int = 8000
     FRONTEND_URL: str = "http://localhost:5173"
 
@@ -44,13 +45,15 @@ class Settings(BaseSettings):
     DB_PASSWORD: str | None = None
 
     # ── JWT ────────────────────────────────────────────────────
-    JWT_SECRET_KEY: str = "change-me-to-a-long-random-string-in-production"  # noqa: S105 – placeholder, must be overridden in production via env var
-    JWT_ALGORITHM: str = "HS256"
+    JWT_SECRET_KEY: str = "change-me-to-a-long-random-string-in-production"  # noqa: S105 – placeholder, rejected outside testing
+    JWT_ALGORITHM: Literal["HS256"] = "HS256"
+    JWT_ISSUER: str = "live-memories"
+    JWT_AUDIENCE: str = "live-memories-api"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
     # ── Admin user ─────────────────────────────────────────────
     ADMIN_EMAIL: str = "admin@example.com"
-    ADMIN_PASSWORD: str = "change-me-in-production"  # noqa: S105 – placeholder, must be overridden in production via env var
+    ADMIN_PASSWORD: str = "change-me-in-production"  # noqa: S105 – placeholder, rejected outside testing
 
     # ── Storage ────────────────────────────────────────────────
     STORAGE_BACKEND: Literal["local", "gcs"] = "local"
@@ -100,15 +103,11 @@ class Settings(BaseSettings):
         if "*" in self.CORS_ORIGINS:
             raise ValueError("CORS_ORIGINS cannot contain '*'")
 
-        if self.APP_ENV in {"staging", "production"}:
+        if self.APP_ENV != "testing":
             if self.JWT_SECRET_KEY.startswith("change-me") or len(self.JWT_SECRET_KEY) < 32:
-                raise ValueError(
-                    "JWT_SECRET_KEY must be overridden in staging/production and have at least 32 characters"
-                )
+                raise ValueError("JWT_SECRET_KEY must be overridden outside testing and have at least 32 characters")
             if self.ADMIN_PASSWORD.startswith("change-me") or len(self.ADMIN_PASSWORD) < 12:
-                raise ValueError(
-                    "ADMIN_PASSWORD must be overridden in staging/production and have at least 12 characters"
-                )
+                raise ValueError("ADMIN_PASSWORD must be overridden outside testing and have at least 12 characters")
 
         return self
 
@@ -121,6 +120,11 @@ class Settings(BaseSettings):
     def max_upload_size_bytes(self) -> int:
         """MAX_UPLOAD_SIZE_MB converted to bytes."""
         return self.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+
+    @property
+    def sql_echo(self) -> bool:
+        """SQL echo is only allowed in local debug, never in staging/production."""
+        return self.APP_DEBUG and self.APP_ENV in {"development", "testing"}
 
 
 @lru_cache

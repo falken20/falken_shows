@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import time
 import uuid
-from collections import defaultdict
+from collections import OrderedDict
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
@@ -23,13 +23,12 @@ logger = logging.getLogger(__name__)
 
 # ── In-memory rate limiter (sliding window) ────────────────────
 # Stores {ip: [timestamp, ...]} for a 60-second rolling window.
-_rate_limit_store: dict[str, list[float]] = defaultdict(list)
+_rate_limit_store: OrderedDict[str, list[float]] = OrderedDict()
 _RATE_LIMIT_MAX = 120  # requests per window
 _RATE_LIMIT_WINDOW = 60  # seconds
 _RATE_LIMIT_MAX_TRACKED_IPS = 10_000
 _RATE_LIMIT_EXCLUDED_PATHS = {
     "/api/v1/health",
-    "/api/v1/ready",
 }
 
 
@@ -85,8 +84,9 @@ async def rate_limit(request: Request, call_next: Callable[[Request], Awaitable[
     limit is exceeded.
 
     Note:
-        This limiter is per-process. In multi-replica deployments, consider
-        replacing it with a Redis-backed solution (e.g. via limits library).
+        This limiter is per-process. Login lockout is persisted in the database
+        so it remains effective across Cloud Run replicas. For a shared API
+        quota, put a proxy-level limiter (Cloud Armor / API Gateway) in front.
     """
     if request.url.path in _RATE_LIMIT_EXCLUDED_PATHS:
         return await call_next(request)
@@ -95,21 +95,22 @@ async def rate_limit(request: Request, call_next: Callable[[Request], Awaitable[
     now = time.time()
     window_start = now - _RATE_LIMIT_WINDOW
 
-    # Cap tracked IPs to prevent unbounded memory growth
-    if len(_rate_limit_store) > _RATE_LIMIT_MAX_TRACKED_IPS:
-        _rate_limit_store.clear()
+    timestamps = _rate_limit_store.get(client_ip, [])
+    timestamps = [t for t in timestamps if t > window_start]
+    _rate_limit_store[client_ip] = timestamps
+    _rate_limit_store.move_to_end(client_ip)
 
-    timestamps = _rate_limit_store[client_ip]
-    _rate_limit_store[client_ip] = [t for t in timestamps if t > window_start]
+    while len(_rate_limit_store) > _RATE_LIMIT_MAX_TRACKED_IPS:
+        _rate_limit_store.popitem(last=False)
 
-    if len(_rate_limit_store[client_ip]) >= _RATE_LIMIT_MAX:
+    if len(timestamps) >= _RATE_LIMIT_MAX:
         return JSONResponse(
             status_code=429,
             content={"error": {"code": "RATE_LIMIT_EXCEEDED", "message": "Too many requests", "details": {}}},
             headers={"Retry-After": str(_RATE_LIMIT_WINDOW)},
         )
 
-    _rate_limit_store[client_ip].append(now)
+    timestamps.append(now)
     return await call_next(request)
 
 
@@ -139,8 +140,9 @@ async def add_security_headers(request: Request, call_next: Callable[[Request], 
         - ``Referrer-Policy`` – limits referrer leakage across origins.
         - ``Content-Security-Policy`` – restrictive policy for an API (no browser assets).
         - ``Permissions-Policy`` – disables unnecessary browser features.
+        - ``Cache-Control: no-store`` – prevents intermediaries from caching API data.
 
-    Additionally in production:
+    Additionally in staging and production:
         - ``Strict-Transport-Security`` – enforces HTTPS for two years with preload.
     """
     response = await call_next(request)
@@ -151,8 +153,9 @@ async def add_security_headers(request: Request, call_next: Callable[[Request], 
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
     response.headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()"
+    response.headers["Cache-Control"] = "no-store"
 
-    if settings.APP_ENV == "production":
+    if settings.APP_ENV in {"production", "staging"}:
         response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains; preload"
 
     return response
