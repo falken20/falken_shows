@@ -26,6 +26,27 @@ class TestProductionDocsDisabled:
         assert settings.APP_ENV != "production"
 
 
+class TestClientIp:
+    def test_ignores_forwarded_headers_for_security_controls(self) -> None:
+        from starlette.requests import Request
+
+        from app.core.client_ip import get_client_ip
+
+        request = Request(
+            {
+                "type": "http",
+                "method": "GET",
+                "path": "/",
+                "headers": [(b"x-forwarded-for", b"attacker, 203.0.113.10")],
+                "client": ("198.51.100.10", 12345),
+                "server": ("127.0.0.1", 8000),
+                "scheme": "http",
+            }
+        )
+
+        assert get_client_ip(request) == "198.51.100.10"
+
+
 class TestCorsCredentials:
     def test_credentials_disabled_in_production(self) -> None:
         from app.core.config import Settings
