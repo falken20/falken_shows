@@ -89,12 +89,18 @@ export default function ConcertDetailPage() {
 
       <Paper elevation={2} sx={{ p: 3 }}>
         {/* Title & actions */}
-        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" mb={2}>
-          <Typography variant="h4" component="h1" fontWeight={700}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          alignItems={{ xs: 'stretch', sm: 'flex-start' }}
+          justifyContent="space-between"
+          gap={2}
+          mb={2}
+        >
+          <Typography variant="h4" component="h1" fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>
             {concert.title}
           </Typography>
           {isAuthenticated && (
-            <Stack direction="row" spacing={1}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
               <Button
                 variant="outlined"
                 startIcon={<EditIcon aria-hidden="true" />}
@@ -122,16 +128,16 @@ export default function ConcertDetailPage() {
 
         {/* Details */}
         <Stack spacing={1.5}>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ minWidth: { sm: 120 } }}>
               {t('concerts.form.date')}
             </Typography>
-            <Typography variant="body1">{concert.date}</Typography>
+            <Typography variant="body1" sx={{ overflowWrap: 'anywhere' }}>{concert.date}</Typography>
           </Stack>
 
           {concert.artist && (
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ minWidth: { sm: 120 } }}>
                 {t('concerts.form.artist')}
               </Typography>
               <Typography variant="body1">{concert.artist.name}</Typography>
@@ -140,19 +146,19 @@ export default function ConcertDetailPage() {
           )}
 
           {concert.venue && (
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ minWidth: { sm: 120 } }}>
                 {t('concerts.form.venue')}
               </Typography>
-              <Typography variant="body1">
+              <Typography variant="body1" sx={{ overflowWrap: 'anywhere' }}>
                 {concert.venue.name}, {concert.venue.city}
               </Typography>
             </Stack>
           )}
 
           {concert.rating !== null && (
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ minWidth: { sm: 120 } }}>
                 {t('concerts.form.rating')}
               </Typography>
               <Rating
@@ -164,11 +170,11 @@ export default function ConcertDetailPage() {
           )}
 
           {concert.ticket_price !== null && (
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ minWidth: { sm: 120 } }}>
                 {t('concerts.form.ticketPrice')}
               </Typography>
-              <Typography variant="body1">
+              <Typography variant="body1" sx={{ overflowWrap: 'anywhere' }}>
                 {concert.ticket_price} {concert.currency}
               </Typography>
             </Stack>

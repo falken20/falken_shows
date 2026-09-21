@@ -35,7 +35,13 @@ export default function ConcertsPage() {
   return (
     <Box sx={{ py: 4, px: { xs: 2, sm: 4 } }}>
       {/* Header */}
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        alignItems={{ xs: 'stretch', sm: 'center' }}
+        justifyContent="space-between"
+        gap={2}
+        mb={3}
+      >
         <Typography variant="h4" component="h1" fontWeight={700}>
           {t('concerts.title')}
         </Typography>
@@ -46,6 +52,7 @@ export default function ConcertsPage() {
             component={RouterLink}
             to="/concerts/new"
             aria-label={t('concerts.addNew')}
+            sx={{ alignSelf: { xs: 'stretch', sm: 'auto' } }}
           >
             {t('concerts.addNew')}
           </Button>
@@ -76,8 +83,9 @@ export default function ConcertsPage() {
 
       {/* Table */}
       {data && data.items.length > 0 && (
-        <Paper elevation={2}>
-          <Table aria-label={t('concerts.title')}>
+        <Paper elevation={2} sx={{ overflow: 'hidden' }}>
+          <Box sx={{ overflowX: 'auto', width: '100%' }}>
+            <Table aria-label={t('concerts.title')} sx={{ minWidth: 650 }}>
             <TableHead>
               <TableRow>
                 <TableCell>{t('concerts.form.title')}</TableCell>
@@ -117,14 +125,15 @@ export default function ConcertsPage() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+            </Table>
+          </Box>
 
           {/* Pagination */}
           <Stack
-            direction="row"
+            direction={{ xs: 'column', sm: 'row' }}
             alignItems="center"
             justifyContent="center"
-            spacing={2}
+            spacing={{ xs: 0.5, sm: 2 }}
             sx={{ py: 2 }}
           >
             <Button

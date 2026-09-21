@@ -290,7 +290,7 @@ export default function ConcertFormPage() {
             />
 
             {/* Ticket price & currency */}
-            <Stack direction="row" spacing={2}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <Controller
                 name="ticket_price"
                 control={control}
@@ -317,7 +317,7 @@ export default function ConcertFormPage() {
                   <TextField
                     {...field}
                     label={t('concerts.form.currency')}
-                    sx={{ width: 120 }}
+                    sx={{ width: { xs: '100%', sm: 120 } }}
                     error={Boolean(errors.currency)}
                     helperText={errors.currency ? t('errors.validation.invalid') : undefined}
                     inputProps={{ maxLength: 3, 'aria-label': t('concerts.form.currency') }}
@@ -343,12 +343,13 @@ export default function ConcertFormPage() {
             />
 
             {/* Submit */}
-            <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1} justifyContent="flex-end">
               <Button
                 onClick={() => {
                   void navigate(isEditing ? `/concerts/${numericId}` : '/concerts')
                 }}
                 aria-label={t('common.cancel')}
+                sx={{ width: { xs: '100%', sm: 'auto' } }}
               >
                 {t('common.cancel')}
               </Button>
@@ -357,6 +358,7 @@ export default function ConcertFormPage() {
                 variant="contained"
                 disabled={isSubmitting}
                 aria-label={t('common.save')}
+                sx={{ width: { xs: '100%', sm: 'auto' } }}
               >
                 {isSubmitting ? (
                   <CircularProgress size={20} aria-hidden="true" />
