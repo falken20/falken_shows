@@ -12,18 +12,26 @@ pytestmark = pytest.mark.asyncio
 
 
 class TestListArtists:
-    async def test_returns_empty_list_when_no_artists(self, async_client: AsyncClient) -> None:
+    async def test_list_requires_auth(self, async_client: AsyncClient) -> None:
         response = await async_client.get("/api/v1/artists")
+        assert response.status_code == 401
+
+    async def test_returns_empty_list_when_no_artists(
+        self, async_client: AsyncClient, auth_headers: dict[str, str]
+    ) -> None:
+        response = await async_client.get("/api/v1/artists", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 0
         assert data["items"] == []
 
-    async def test_returns_artists(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_returns_artists(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_headers: dict[str, str]
+    ) -> None:
         await create_artist(db_session, name="Radiohead")
         await create_artist(db_session, name="Portishead")
 
-        response = await async_client.get("/api/v1/artists")
+        response = await async_client.get("/api/v1/artists", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 2
@@ -31,11 +39,13 @@ class TestListArtists:
         assert "Radiohead" in names
         assert "Portishead" in names
 
-    async def test_pagination_params_are_respected(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_pagination_params_are_respected(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_headers: dict[str, str]
+    ) -> None:
         for i in range(5):
             await create_artist(db_session, name=f"Artist {i}")
 
-        response = await async_client.get("/api/v1/artists?page=1&page_size=3")
+        response = await async_client.get("/api/v1/artists?page=1&page_size=3", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 5
@@ -43,16 +53,18 @@ class TestListArtists:
 
 
 class TestGetArtist:
-    async def test_returns_artist(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_returns_artist(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_headers: dict[str, str]
+    ) -> None:
         artist = await create_artist(db_session, name="Sigur Rós")
-        response = await async_client.get(f"/api/v1/artists/{artist.id}")
+        response = await async_client.get(f"/api/v1/artists/{artist.id}", headers=auth_headers)
         assert response.status_code == 200
         body = response.json()
         assert body["id"] == artist.id
         assert body["name"] == "Sigur Rós"
 
-    async def test_returns_404_for_unknown_id(self, async_client: AsyncClient) -> None:
-        response = await async_client.get("/api/v1/artists/99999")
+    async def test_returns_404_for_unknown_id(self, async_client: AsyncClient, auth_headers: dict[str, str]) -> None:
+        response = await async_client.get("/api/v1/artists/99999", headers=auth_headers)
         assert response.status_code == 404
         assert response.json()["error"]["code"] == "ARTIST_NOT_FOUND"
 

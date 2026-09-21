@@ -4,11 +4,11 @@ import { Route, Routes } from 'react-router-dom'
 import ConcertFormPage from './ConcertFormPage'
 
 beforeEach(() => {
-  localStorage.setItem('live-memories-token', 'mock-jwt-token')
+  sessionStorage.setItem('live-memories-token', 'mock-jwt-token')
 })
 
 afterEach(() => {
-  localStorage.clear()
+  sessionStorage.clear()
 })
 
 it('validates required fields', async () => {

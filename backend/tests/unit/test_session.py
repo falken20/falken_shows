@@ -10,12 +10,14 @@ def test_injects_db_password_when_postgres_url_has_no_password(monkeypatch) -> N
 
     url = db_session._inject_db_password("postgresql+asyncpg://live_memories@/live_memories?host=/cloudsql/example")
 
-    assert "live_memories:secret-password@" in url
+    assert url.password == "secret-password"
+    assert "secret-password" not in url.render_as_string(hide_password=True)
 
 
 def test_keeps_existing_db_password(monkeypatch) -> None:
     monkeypatch.setattr(db_session.settings, "DB_PASSWORD", "ignored")
 
-    url = "postgresql+asyncpg://live_memories:existing@/live_memories?host=/cloudsql/example"
+    raw = "postgresql+asyncpg://live_memories:existing@/live_memories?host=/cloudsql/example"
+    url = db_session._inject_db_password(raw)
 
-    assert db_session._inject_db_password(url) == url
+    assert url.password == "existing"

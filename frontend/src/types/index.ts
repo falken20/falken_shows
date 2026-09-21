@@ -115,13 +115,10 @@ export interface PaginatedResponse<T> {
 /** Response shape for GET /api/v1/health */
 export interface HealthResponse {
   status: 'ok' | 'degraded' | 'error'
-  app_name: string
-  version: string
-  environment: string
 }
 
 /** Response shape for GET /api/v1/ready */
 export interface ReadinessResponse {
-  status: 'ok' | 'degraded' | 'error'
+  status: 'ok' | 'error'
   database: 'ok' | 'error'
 }

@@ -17,10 +17,11 @@ _service = ArtistService()
 @router.get("", response_model=PaginatedResponse[ArtistResponse])
 async def list_artists(
     db: Annotated[AsyncSession, Depends(get_db)],
+    _user: Annotated[dict[str, Any], Depends(get_current_user)],
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
 ) -> PaginatedResponse[ArtistResponse]:
-    """List all artists (public)."""
+    """List all artists. Requires authentication."""
     return await _service.list_artists(db, page=page, page_size=page_size)
 
 
@@ -28,18 +29,19 @@ async def list_artists(
 async def create_artist(
     data: ArtistCreate,
     db: Annotated[AsyncSession, Depends(get_db)],
-    _user: Annotated[dict[str, Any], Depends(get_current_user)],
+    user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> ArtistResponse:
     """Create a new artist. Requires authentication."""
-    return await _service.create_artist(db, data)
+    return await _service.create_artist(db, data, actor=str(user["sub"]))
 
 
 @router.get("/{artist_id}", response_model=ArtistResponse)
 async def get_artist(
     artist_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
+    _user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> ArtistResponse:
-    """Retrieve a single artist by ID (public)."""
+    """Retrieve a single artist by ID. Requires authentication."""
     return await _service.get_artist(db, artist_id)
 
 
@@ -48,17 +50,17 @@ async def update_artist(
     artist_id: int,
     data: ArtistUpdate,
     db: Annotated[AsyncSession, Depends(get_db)],
-    _user: Annotated[dict[str, Any], Depends(get_current_user)],
+    user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> ArtistResponse:
     """Update an artist. Requires authentication."""
-    return await _service.update_artist(db, artist_id, data)
+    return await _service.update_artist(db, artist_id, data, actor=str(user["sub"]))
 
 
 @router.delete("/{artist_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
 async def delete_artist(
     artist_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
-    _user: Annotated[dict[str, Any], Depends(get_current_user)],
+    user: Annotated[dict[str, Any], Depends(get_current_user)],
 ) -> None:
     """Delete an artist. Requires authentication."""
-    await _service.delete_artist(db, artist_id)
+    await _service.delete_artist(db, artist_id, actor=str(user["sub"]))

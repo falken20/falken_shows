@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from fastapi import Request
 
-from app.core.config import settings
-
 
 def get_client_ip(request: Request) -> str:
-    if settings.TRUST_PROXY_HEADERS:
-        forwarded = request.headers.get("x-forwarded-for")
-        if forwarded:
-            return forwarded.split(",")[0].strip()
+    """Return the client IP for rate limiting and login lockout.
+
+    ``X-Forwarded-For`` is not used here because its contents can be supplied
+    by the client before a proxy appends its own value. Using it for security
+    controls would let a client select a new rate-limit key on every request.
+    Deployments that need per-client limits behind a proxy must sanitize the
+    header at the trusted edge before exposing that identity to the app.
+    """
     return request.client.host if request.client else "unknown"

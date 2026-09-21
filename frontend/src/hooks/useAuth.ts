@@ -3,33 +3,42 @@ import { createElement } from 'react'
 import { authApi } from '@/api/concerts'
 import { apiClient } from '@/api/client'
 
-const TOKEN_KEY = 'live-memories-token'
+export const TOKEN_KEY = 'live-memories-token'
 
 interface AuthContextValue {
   token: string | null
   isAuthenticated: boolean
   login: (username: string, password: string) => Promise<void>
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue>({
   token: null,
   isAuthenticated: false,
   login: async () => {},
-  logout: () => {},
+  logout: async () => {},
 })
 
+function readStoredToken(): string | null {
+  return sessionStorage.getItem(TOKEN_KEY)
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY))
+  const [token, setToken] = useState<string | null>(() => readStoredToken())
 
   const login = useCallback(async (username: string, password: string): Promise<void> => {
     const response = await authApi.login(username, password)
-    localStorage.setItem(TOKEN_KEY, response.access_token)
+    sessionStorage.setItem(TOKEN_KEY, response.access_token)
     setToken(response.access_token)
   }, [])
 
-  const logout = useCallback((): void => {
-    localStorage.removeItem(TOKEN_KEY)
+  const logout = useCallback(async (): Promise<void> => {
+    try {
+      await authApi.logout()
+    } catch {
+      // Client logout still proceeds if the token is already invalid.
+    }
+    sessionStorage.removeItem(TOKEN_KEY)
     setToken(null)
   }, [])
 
@@ -44,9 +53,8 @@ export function useAuth() {
   return useContext(AuthContext)
 }
 
-// Axios request interceptor: attach token automatically
 apiClient.interceptors.request.use(config => {
-  const t = localStorage.getItem(TOKEN_KEY)
+  const t = sessionStorage.getItem(TOKEN_KEY)
   if (t && config.headers) {
     config.headers.Authorization = `Bearer ${t}`
   }

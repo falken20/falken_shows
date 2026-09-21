@@ -32,9 +32,17 @@
       "label": "API Status",
       "title": "Server status",
       "status": "Status",
-      "environment": "Environment",
       "error": "Cannot connect to the server. Is the backend running?"
     }
+  },
+  "auth": {
+    "login": "Log in",
+    "logout": "Log out",
+    "loginTitle": "Admin sign in",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "invalidCredentials": "Invalid credentials"
   },
   "theme": {
     "switchToDark": "Switch to dark mode",

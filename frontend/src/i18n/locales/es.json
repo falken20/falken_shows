@@ -32,9 +32,17 @@
       "label": "Estado de la API",
       "title": "Estado del servidor",
       "status": "Estado",
-      "environment": "Entorno",
       "error": "No se puede conectar con el servidor. ¿Está el backend en marcha?"
     }
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "loginTitle": "Acceso de administrador",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "submit": "Entrar",
+    "invalidCredentials": "Credenciales no válidas"
   },
   "theme": {
     "switchToDark": "Cambiar a modo oscuro",

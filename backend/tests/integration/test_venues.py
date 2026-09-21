@@ -12,18 +12,26 @@ pytestmark = pytest.mark.asyncio
 
 
 class TestListVenues:
-    async def test_returns_empty_list_when_no_venues(self, async_client: AsyncClient) -> None:
+    async def test_list_requires_auth(self, async_client: AsyncClient) -> None:
         response = await async_client.get("/api/v1/venues")
+        assert response.status_code == 401
+
+    async def test_returns_empty_list_when_no_venues(
+        self, async_client: AsyncClient, auth_headers: dict[str, str]
+    ) -> None:
+        response = await async_client.get("/api/v1/venues", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 0
         assert data["items"] == []
 
-    async def test_returns_venues(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_returns_venues(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_headers: dict[str, str]
+    ) -> None:
         await create_venue(db_session, name="Wembley Arena", city="London", country="GB")
         await create_venue(db_session, name="Palau Sant Jordi", city="Barcelona", country="ES")
 
-        response = await async_client.get("/api/v1/venues")
+        response = await async_client.get("/api/v1/venues", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 2
@@ -31,11 +39,13 @@ class TestListVenues:
         assert "Wembley Arena" in names
         assert "Palau Sant Jordi" in names
 
-    async def test_pagination_params_are_respected(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_pagination_params_are_respected(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_headers: dict[str, str]
+    ) -> None:
         for i in range(5):
             await create_venue(db_session, name=f"Venue {i}")
 
-        response = await async_client.get("/api/v1/venues?page=1&page_size=3")
+        response = await async_client.get("/api/v1/venues?page=1&page_size=3", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 5
@@ -43,17 +53,19 @@ class TestListVenues:
 
 
 class TestGetVenue:
-    async def test_returns_venue(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_returns_venue(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_headers: dict[str, str]
+    ) -> None:
         venue = await create_venue(db_session, name="Red Rocks", capacity=9525)
-        response = await async_client.get(f"/api/v1/venues/{venue.id}")
+        response = await async_client.get(f"/api/v1/venues/{venue.id}", headers=auth_headers)
         assert response.status_code == 200
         body = response.json()
         assert body["id"] == venue.id
         assert body["name"] == "Red Rocks"
         assert body["capacity"] == 9525
 
-    async def test_returns_404_for_unknown_id(self, async_client: AsyncClient) -> None:
-        response = await async_client.get("/api/v1/venues/99999")
+    async def test_returns_404_for_unknown_id(self, async_client: AsyncClient, auth_headers: dict[str, str]) -> None:
+        response = await async_client.get("/api/v1/venues/99999", headers=auth_headers)
         assert response.status_code == 404
         assert response.json()["error"]["code"] == "VENUE_NOT_FOUND"
 

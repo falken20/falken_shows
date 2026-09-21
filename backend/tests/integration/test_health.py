@@ -19,9 +19,9 @@ async def test_health_check_response_body(async_client: AsyncClient) -> None:
     response = await async_client.get("/api/v1/health")
     data = response.json()
     assert data["status"] == "ok"
-    assert "app_name" in data
-    assert "version" in data
-    assert "environment" in data
+    assert "environment" not in data
+    assert "version" not in data
+    assert "app_name" not in data
 
 
 async def test_readiness_check_returns_200(async_client: AsyncClient) -> None:
@@ -36,8 +36,8 @@ async def test_readiness_check_db_ok(async_client: AsyncClient) -> None:
     assert data["database"] == "ok"
 
 
-async def test_readiness_check_db_error_returns_degraded(async_client: AsyncClient) -> None:
-    """When the DB connection fails, /ready must report status=degraded, not 5xx."""
+async def test_readiness_check_db_error_returns_503(async_client: AsyncClient) -> None:
+    """When the DB connection fails, /ready must return HTTP 503."""
     from app.db.session import get_db
     from app.main import app
 
@@ -51,9 +51,9 @@ async def test_readiness_check_db_error_returns_degraded(async_client: AsyncClie
     app.dependency_overrides[get_db] = override_get_db
 
     response = await async_client.get("/api/v1/ready")
-    assert response.status_code == 200
+    assert response.status_code == 503
     data = response.json()
-    assert data["status"] == "degraded"
+    assert data["status"] == "error"
     assert data["database"] == "error"
 
 
@@ -70,6 +70,7 @@ async def test_security_headers_present(async_client: AsyncClient) -> None:
     csp = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
     assert response.headers.get("content-security-policy") == csp
     assert response.headers.get("permissions-policy") == "geolocation=(), camera=(), microphone=()"
+    assert response.headers.get("cache-control") == "no-store"
 
 
 async def test_request_id_header_present(async_client: AsyncClient) -> None:
@@ -84,10 +85,10 @@ async def test_rate_limit_returns_429_after_threshold(async_client: AsyncClient)
     _rate_limit_store.clear()
     try:
         for _ in range(_RATE_LIMIT_MAX):
-            response = await async_client.get("/api/v1/artists")
+            response = await async_client.get("/api/v1/ready")
             assert response.status_code == 200
 
-        response = await async_client.get("/api/v1/artists")
+        response = await async_client.get("/api/v1/ready")
         assert response.status_code == 429
         assert response.json()["error"]["code"] == "RATE_LIMIT_EXCEEDED"
         assert "Retry-After" in response.headers

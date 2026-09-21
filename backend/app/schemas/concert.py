@@ -34,7 +34,7 @@ class PaginatedResponse(BaseModel, Generic[T]):
 
 
 class ArtistBase(BaseModel):
-    name: str = Field(..., max_length=255)
+    name: str = Field(..., min_length=1, max_length=255)
     bio: str | None = Field(None, max_length=10000)
     country: str | None = Field(None, max_length=100)
 
@@ -44,7 +44,7 @@ class ArtistCreate(ArtistBase):
 
 
 class ArtistUpdate(BaseModel):
-    name: str | None = Field(None, max_length=255)
+    name: str | None = Field(None, min_length=1, max_length=255)
     bio: str | None = Field(None, max_length=10000)
     country: str | None = Field(None, max_length=100)
 
@@ -62,9 +62,9 @@ class ArtistResponse(ArtistBase):
 
 
 class VenueBase(BaseModel):
-    name: str = Field(..., max_length=255)
-    city: str = Field(..., max_length=100)
-    country: str = Field(..., max_length=100)
+    name: str = Field(..., min_length=1, max_length=255)
+    city: str = Field(..., min_length=1, max_length=100)
+    country: str = Field(..., min_length=1, max_length=100)
     capacity: int | None = Field(None, ge=1)
 
 
@@ -73,9 +73,9 @@ class VenueCreate(VenueBase):
 
 
 class VenueUpdate(BaseModel):
-    name: str | None = Field(None, max_length=255)
-    city: str | None = Field(None, max_length=100)
-    country: str | None = Field(None, max_length=100)
+    name: str | None = Field(None, min_length=1, max_length=255)
+    city: str | None = Field(None, min_length=1, max_length=100)
+    country: str | None = Field(None, min_length=1, max_length=100)
     capacity: int | None = Field(None, ge=1)
 
 
@@ -92,7 +92,7 @@ class VenueResponse(VenueBase):
 
 
 class ConcertBase(BaseModel):
-    title: str = Field(..., max_length=255)
+    title: str = Field(..., min_length=1, max_length=255)
     artist_id: int | None = None
     venue_id: int | None = None
     date: datetime
@@ -108,7 +108,7 @@ class ConcertCreate(ConcertBase):
 
 
 class ConcertUpdate(BaseModel):
-    title: str | None = Field(None, max_length=255)
+    title: str | None = Field(None, min_length=1, max_length=255)
     artist_id: int | None = None
     venue_id: int | None = None
     date: datetime | None = None

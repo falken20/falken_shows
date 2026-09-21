@@ -28,6 +28,16 @@ def test_development_uses_human_readable_formatter(monkeypatch: pytest.MonkeyPat
     assert not formatted.strip().startswith("{")
 
 
+def test_redacts_secrets_from_log_messages(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(settings, "APP_ENV", "development")
+    configure_logging()
+    handler = logging.getLogger().handlers[0]
+    record = logging.LogRecord("test", logging.INFO, __file__, 1, "password=super-secret token=abc", None, None)
+    formatted = handler.formatter.format(record)  # type: ignore[union-attr]
+    assert "super-secret" not in formatted
+    assert "***" in formatted
+
+
 def test_production_uses_json_formatter(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "APP_ENV", "production")
     configure_logging()

@@ -1,43 +1,89 @@
 from __future__ import annotations
 
+import hashlib
 import hmac
-import time
-from collections import defaultdict
+from datetime import UTC, datetime, timedelta
+
+from sqlalchemy import delete, func, select, text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.exceptions import AppError, ErrorCode
 from app.core.security import create_access_token, hash_password, verify_password
+from app.models.auth import FailedLoginAttempt, LoginAttemptLock, RevokedToken
 
 _ADMIN_PASSWORD_HASH = hash_password(settings.ADMIN_PASSWORD)
-_failed_login_attempts: dict[str, list[float]] = defaultdict(list)
 _LOGIN_MAX_ATTEMPTS = 10
 _LOGIN_WINDOW = 300
+_MAX_PASSWORD_LENGTH = 128
 
 
-def authenticate(email: str, password: str, *, client_ip: str = "unknown") -> str:
+def _digest(value: str) -> bytes:
+    return hashlib.sha256(value.encode("utf-8")).digest()
+
+
+async def authenticate(email: str, password: str, *, session: AsyncSession, client_ip: str = "unknown") -> str:
     """Validate admin credentials and return a signed JWT.
 
     Raises:
         AppError: with ``ErrorCode.UNAUTHORIZED`` and HTTP 401 when the
             email or password is incorrect.
+        AppError: with ``ErrorCode.RATE_LIMIT_EXCEEDED`` after too many failures.
     """
-    _assert_login_allowed(client_ip)
+    await _lock_login_attempts(session)
+    await _assert_login_allowed(session, client_ip)
 
-    if not hmac.compare_digest(email, settings.ADMIN_EMAIL) or not verify_password(password, _ADMIN_PASSWORD_HASH):
-        _record_failed_login(client_ip)
+    candidate = password if len(password) <= _MAX_PASSWORD_LENGTH else password[:_MAX_PASSWORD_LENGTH]
+    email_ok = hmac.compare_digest(_digest(email), _digest(settings.ADMIN_EMAIL))
+    password_ok = verify_password(candidate, _ADMIN_PASSWORD_HASH)
+    if len(password) > _MAX_PASSWORD_LENGTH:
+        password_ok = False
+
+    if not (email_ok and password_ok):
+        await _record_failed_login(session, client_ip)
         raise AppError(ErrorCode.UNAUTHORIZED, status_code=401)
 
-    _failed_login_attempts.pop(client_ip, None)
-    return create_access_token({"sub": email})
+    await _clear_failed_logins(session, client_ip)
+    return create_access_token({"sub": settings.ADMIN_EMAIL})
 
 
-def _assert_login_allowed(client_ip: str) -> None:
-    now = time.time()
-    window_start = now - _LOGIN_WINDOW
-    _failed_login_attempts[client_ip] = [t for t in _failed_login_attempts[client_ip] if t > window_start]
-    if len(_failed_login_attempts[client_ip]) >= _LOGIN_MAX_ATTEMPTS:
+async def revoke_access_token(session: AsyncSession, payload: dict[str, object]) -> None:
+    """Persist the token ``jti`` so it cannot be reused until it expires."""
+    await session.execute(delete(RevokedToken).where(RevokedToken.expires_at <= datetime.now(UTC)))
+    jti = payload.get("jti")
+    exp = payload.get("exp")
+    if not isinstance(jti, str) or not isinstance(exp, (int, float)):
+        raise AppError(ErrorCode.UNAUTHORIZED, status_code=401)
+    expires_at = datetime.fromtimestamp(float(exp), tz=UTC)
+    session.add(RevokedToken(jti=jti, expires_at=expires_at))
+    await session.flush()
+
+
+async def _lock_login_attempts(session: AsyncSession) -> None:
+    """Serialize login lockout reads and writes across concurrent requests."""
+    if session.bind is not None and session.bind.dialect.name == "sqlite":
+        await session.execute(text("BEGIN IMMEDIATE"))
+    else:
+        await session.execute(select(LoginAttemptLock).where(LoginAttemptLock.id == 1).with_for_update())
+
+
+async def _assert_login_allowed(session: AsyncSession, client_ip: str) -> None:
+    window_start = datetime.now(UTC) - timedelta(seconds=_LOGIN_WINDOW)
+    await session.execute(delete(FailedLoginAttempt).where(FailedLoginAttempt.attempted_at < window_start))
+    count = await session.scalar(
+        select(func.count())
+        .select_from(FailedLoginAttempt)
+        .where(FailedLoginAttempt.client_ip == client_ip, FailedLoginAttempt.attempted_at > window_start)
+    )
+    if (count or 0) >= _LOGIN_MAX_ATTEMPTS:
         raise AppError(ErrorCode.RATE_LIMIT_EXCEEDED, status_code=429, message="Too many login attempts")
 
 
-def _record_failed_login(client_ip: str) -> None:
-    _failed_login_attempts[client_ip].append(time.time())
+async def _record_failed_login(session: AsyncSession, client_ip: str) -> None:
+    session.add(FailedLoginAttempt(client_ip=client_ip, attempted_at=datetime.now(UTC)))
+    await session.commit()
+
+
+async def _clear_failed_logins(session: AsyncSession, client_ip: str) -> None:
+    await session.execute(delete(FailedLoginAttempt).where(FailedLoginAttempt.client_ip == client_ip))
+    await session.flush()

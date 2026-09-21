@@ -28,8 +28,15 @@ FROM nginx:1.31-alpine AS runtime
 # Create non-root user
 RUN addgroup -g 1001 appgroup && adduser -u 1001 -G appgroup -s /bin/sh -D appuser
 
-# Copy Nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy Nginx config and pin CSP connect-src to the API origin (no wildcard).
+ARG VITE_API_BASE_URL=http://localhost:8000/api/v1
+COPY nginx.conf /tmp/nginx.conf
+RUN API_ORIGIN="$(echo "${VITE_API_BASE_URL}" | sed -E 's#(https?://[^/]+).*#\1#')" && \
+    if echo "${VITE_API_BASE_URL}" | grep -q '^https\?://'; then \
+      sed "s|__API_ORIGIN__|${API_ORIGIN}|g" /tmp/nginx.conf > /etc/nginx/conf.d/default.conf; \
+    else \
+      sed "s| __API_ORIGIN__||g" /tmp/nginx.conf > /etc/nginx/conf.d/default.conf; \
+    fi
 
 # Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html

@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import AsyncGenerator
 
-import pytest
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+os.environ["APP_ENV"] = "testing"
 
-from app.db.session import Base, _enable_sqlite_fk, get_db
-from app.main import app
+import pytest  # noqa: E402
+from httpx import ASGITransport, AsyncClient  # noqa: E402
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine  # noqa: E402
+
+from app.db.session import Base, _enable_sqlite_fk, get_db  # noqa: E402
+from app.main import app  # noqa: E402
 
 # ── In-memory SQLite for tests ────────────────────────────────
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -55,3 +58,8 @@ async def auth_token(async_client: AsyncClient) -> str:
     )
     assert response.status_code == 200
     return str(response.json()["access_token"])
+
+
+@pytest.fixture()
+def auth_headers(auth_token: str) -> dict[str, str]:
+    return {"Authorization": f"Bearer {auth_token}"}

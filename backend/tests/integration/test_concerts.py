@@ -12,29 +12,39 @@ pytestmark = pytest.mark.asyncio
 
 
 class TestListConcerts:
-    async def test_returns_empty_list_when_no_concerts(self, async_client: AsyncClient) -> None:
+    async def test_list_requires_auth(self, async_client: AsyncClient) -> None:
         response = await async_client.get("/api/v1/concerts")
+        assert response.status_code == 401
+
+    async def test_returns_empty_list_when_no_concerts(
+        self, async_client: AsyncClient, auth_headers: dict[str, str]
+    ) -> None:
+        response = await async_client.get("/api/v1/concerts", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 0
         assert data["items"] == []
 
-    async def test_returns_concerts(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_returns_concerts(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_headers: dict[str, str]
+    ) -> None:
         artist = await create_artist(db_session, name="Metallica")
         venue = await create_venue(db_session, name="Wembley", city="London", country="GB")
         await create_concert(db_session, artist=artist, venue=venue, title="Metallica Live")
 
-        response = await async_client.get("/api/v1/concerts")
+        response = await async_client.get("/api/v1/concerts", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 1
         assert data["items"][0]["title"] == "Metallica Live"
 
-    async def test_pagination_params_are_respected(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_pagination_params_are_respected(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_headers: dict[str, str]
+    ) -> None:
         for i in range(3):
             await create_concert(db_session, title=f"Concert {i}")
 
-        response = await async_client.get("/api/v1/concerts?page=1&page_size=2")
+        response = await async_client.get("/api/v1/concerts?page=1&page_size=2", headers=auth_headers)
         assert response.status_code == 200
         data = response.json()
         assert data["total"] == 3
@@ -42,14 +52,16 @@ class TestListConcerts:
 
 
 class TestGetConcert:
-    async def test_returns_concert(self, async_client: AsyncClient, db_session: AsyncSession) -> None:
+    async def test_returns_concert(
+        self, async_client: AsyncClient, db_session: AsyncSession, auth_headers: dict[str, str]
+    ) -> None:
         concert = await create_concert(db_session)
-        response = await async_client.get(f"/api/v1/concerts/{concert.id}")
+        response = await async_client.get(f"/api/v1/concerts/{concert.id}", headers=auth_headers)
         assert response.status_code == 200
         assert response.json()["id"] == concert.id
 
-    async def test_returns_404_for_unknown_id(self, async_client: AsyncClient) -> None:
-        response = await async_client.get("/api/v1/concerts/99999")
+    async def test_returns_404_for_unknown_id(self, async_client: AsyncClient, auth_headers: dict[str, str]) -> None:
+        response = await async_client.get("/api/v1/concerts/99999", headers=auth_headers)
         assert response.status_code == 404
         assert response.json()["error"]["code"] == "CONCERT_NOT_FOUND"
 

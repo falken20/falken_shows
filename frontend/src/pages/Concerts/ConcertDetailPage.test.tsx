@@ -2,6 +2,14 @@ import { renderWithProviders, screen } from '@/test/utils'
 import { Route, Routes } from 'react-router-dom'
 import ConcertDetailPage from './ConcertDetailPage'
 
+beforeEach(() => {
+  sessionStorage.setItem('live-memories-token', 'mock-jwt-token')
+})
+
+afterEach(() => {
+  sessionStorage.clear()
+})
+
 it('renders concert details returned by the API', async () => {
   window.history.pushState({}, '', '/concerts/1')
 
