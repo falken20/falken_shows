@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 pytestmark = pytest.mark.asyncio
 
@@ -91,6 +92,23 @@ class TestAuthenticate:
 
         response = await async_client.get("/api/v1/artists", headers=headers)
         assert response.status_code == 401
+
+    async def test_logout_purges_expired_revocations(
+        self, async_client: AsyncClient, auth_token: str, db_session: AsyncSession
+    ) -> None:
+        from datetime import UTC, datetime, timedelta
+
+        from app.models.auth import RevokedToken
+
+        db_session.add(RevokedToken(jti="expired-jti", expires_at=datetime.now(UTC) - timedelta(minutes=1)))
+        await db_session.flush()
+
+        response = await async_client.post(
+            "/api/v1/auth/logout",
+            headers={"Authorization": f"Bearer {auth_token}"},
+        )
+        assert response.status_code == 204
+        assert await db_session.get(RevokedToken, "expired-jti") is None
 
 
 class TestCreateConcertWithInvalidFK:

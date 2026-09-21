@@ -4,13 +4,13 @@ import hashlib
 import hmac
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.exceptions import AppError, ErrorCode
 from app.core.security import create_access_token, hash_password, verify_password
-from app.models.auth import FailedLoginAttempt, RevokedToken
+from app.models.auth import FailedLoginAttempt, LoginAttemptLock, RevokedToken
 
 _ADMIN_PASSWORD_HASH = hash_password(settings.ADMIN_PASSWORD)
 _LOGIN_MAX_ATTEMPTS = 10
@@ -30,6 +30,7 @@ async def authenticate(email: str, password: str, *, session: AsyncSession, clie
             email or password is incorrect.
         AppError: with ``ErrorCode.RATE_LIMIT_EXCEEDED`` after too many failures.
     """
+    await _lock_login_attempts(session)
     await _assert_login_allowed(session, client_ip)
 
     candidate = password if len(password) <= _MAX_PASSWORD_LENGTH else password[:_MAX_PASSWORD_LENGTH]
@@ -48,6 +49,7 @@ async def authenticate(email: str, password: str, *, session: AsyncSession, clie
 
 async def revoke_access_token(session: AsyncSession, payload: dict[str, object]) -> None:
     """Persist the token ``jti`` so it cannot be reused until it expires."""
+    await session.execute(delete(RevokedToken).where(RevokedToken.expires_at <= datetime.now(UTC)))
     jti = payload.get("jti")
     exp = payload.get("exp")
     if not isinstance(jti, str) or not isinstance(exp, (int, float)):
@@ -55,6 +57,14 @@ async def revoke_access_token(session: AsyncSession, payload: dict[str, object])
     expires_at = datetime.fromtimestamp(float(exp), tz=UTC)
     session.add(RevokedToken(jti=jti, expires_at=expires_at))
     await session.flush()
+
+
+async def _lock_login_attempts(session: AsyncSession) -> None:
+    """Serialize login lockout reads and writes across concurrent requests."""
+    if session.bind is not None and session.bind.dialect.name == "sqlite":
+        await session.execute(text("BEGIN IMMEDIATE"))
+    else:
+        await session.execute(select(LoginAttemptLock).where(LoginAttemptLock.id == 1).with_for_update())
 
 
 async def _assert_login_allowed(session: AsyncSession, client_ip: str) -> None:

@@ -20,6 +20,14 @@ class FailedLoginAttempt(Base):
     )
 
 
+class LoginAttemptLock(Base):
+    """Singleton row used to serialize login lockout updates across replicas."""
+
+    __tablename__ = "login_attempt_locks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+
 class RevokedToken(Base):
     """JWT ``jti`` values that must be rejected until they expire."""
 

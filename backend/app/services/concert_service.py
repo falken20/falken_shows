@@ -22,11 +22,11 @@ from app.schemas.concert import (
 _artist_repo = ArtistRepository()
 _venue_repo = VenueRepository()
 _concert_repo = ConcertRepository()
-logger = logging.getLogger(__name__)
+audit_logger = logging.getLogger("app.audit")
 
 
 def _audit(action: str, resource: str, resource_id: int | None, actor: str) -> None:
-    logger.info("audit action=%s resource=%s id=%s actor=%s", action, resource, resource_id, actor)
+    audit_logger.info("audit action=%s resource=%s id=%s actor=%s", action, resource, resource_id, actor)
 
 
 class ArtistService:
