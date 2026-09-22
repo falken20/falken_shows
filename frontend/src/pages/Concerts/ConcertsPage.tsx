@@ -86,45 +86,45 @@ export default function ConcertsPage() {
         <Paper elevation={2} sx={{ overflow: 'hidden' }}>
           <Box sx={{ overflowX: 'auto', width: '100%' }}>
             <Table aria-label={t('concerts.title')} sx={{ minWidth: 650 }}>
-            <TableHead>
-              <TableRow>
-                <TableCell>{t('concerts.form.title')}</TableCell>
-                <TableCell>{t('concerts.form.artist')}</TableCell>
-                <TableCell>{t('concerts.form.venue')}</TableCell>
-                <TableCell>{t('concerts.form.date')}</TableCell>
-                <TableCell>{t('concerts.form.rating')}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.items.map(concert => (
-                <TableRow key={concert.id} hover>
-                  <TableCell>
-                    <Button component={RouterLink} to={`/concerts/${concert.id}`} sx={{ px: 0 }}>
-                      {concert.title}
-                    </Button>
-                  </TableCell>
-                  <TableCell>{concert.artist?.name ?? t('common.emptyValue')}</TableCell>
-                  <TableCell>
-                    {concert.venue
-                      ? `${concert.venue.name}, ${concert.venue.city}`
-                      : t('common.emptyValue')}
-                  </TableCell>
-                  <TableCell>{concert.date}</TableCell>
-                  <TableCell>
-                    {concert.rating !== null ? (
-                      <Rating
-                        value={concert.rating}
-                        readOnly
-                        size="small"
-                        aria-label={`${concert.rating}/5`}
-                      />
-                    ) : (
-                      t('common.emptyValue')
-                    )}
-                  </TableCell>
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t('concerts.form.title')}</TableCell>
+                  <TableCell>{t('concerts.form.artist')}</TableCell>
+                  <TableCell>{t('concerts.form.venue')}</TableCell>
+                  <TableCell>{t('concerts.form.date')}</TableCell>
+                  <TableCell>{t('concerts.form.rating')}</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
+              </TableHead>
+              <TableBody>
+                {data.items.map(concert => (
+                  <TableRow key={concert.id} hover>
+                    <TableCell>
+                      <Button component={RouterLink} to={`/concerts/${concert.id}`} sx={{ px: 0 }}>
+                        {concert.title}
+                      </Button>
+                    </TableCell>
+                    <TableCell>{concert.artist?.name ?? t('common.emptyValue')}</TableCell>
+                    <TableCell>
+                      {concert.venue
+                        ? `${concert.venue.name}, ${concert.venue.city}`
+                        : t('common.emptyValue')}
+                    </TableCell>
+                    <TableCell>{concert.date}</TableCell>
+                    <TableCell>
+                      {concert.rating !== null ? (
+                        <Rating
+                          value={concert.rating}
+                          readOnly
+                          size="small"
+                          aria-label={`${concert.rating}/5`}
+                        />
+                      ) : (
+                        t('common.emptyValue')
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
             </Table>
           </Box>
 

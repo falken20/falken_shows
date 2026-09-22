@@ -96,7 +96,12 @@ export default function ConcertDetailPage() {
           gap={2}
           mb={2}
         >
-          <Typography variant="h4" component="h1" fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            fontWeight={700}
+            sx={{ overflowWrap: 'anywhere' }}
+          >
             {concert.title}
           </Typography>
           {isAuthenticated && (
@@ -128,15 +133,25 @@ export default function ConcertDetailPage() {
 
         {/* Details */}
         <Stack spacing={1.5}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1}
+            alignItems={{ xs: 'flex-start', sm: 'center' }}
+          >
             <Typography variant="body2" color="text.secondary" sx={{ minWidth: { sm: 120 } }}>
               {t('concerts.form.date')}
             </Typography>
-            <Typography variant="body1" sx={{ overflowWrap: 'anywhere' }}>{concert.date}</Typography>
+            <Typography variant="body1" sx={{ overflowWrap: 'anywhere' }}>
+              {concert.date}
+            </Typography>
           </Stack>
 
           {concert.artist && (
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1}
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
+            >
               <Typography variant="body2" color="text.secondary" sx={{ minWidth: { sm: 120 } }}>
                 {t('concerts.form.artist')}
               </Typography>
@@ -146,7 +161,11 @@ export default function ConcertDetailPage() {
           )}
 
           {concert.venue && (
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1}
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
+            >
               <Typography variant="body2" color="text.secondary" sx={{ minWidth: { sm: 120 } }}>
                 {t('concerts.form.venue')}
               </Typography>
@@ -157,7 +176,11 @@ export default function ConcertDetailPage() {
           )}
 
           {concert.rating !== null && (
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1}
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
+            >
               <Typography variant="body2" color="text.secondary" sx={{ minWidth: { sm: 120 } }}>
                 {t('concerts.form.rating')}
               </Typography>
@@ -170,7 +193,11 @@ export default function ConcertDetailPage() {
           )}
 
           {concert.ticket_price !== null && (
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={1}
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
+            >
               <Typography variant="body2" color="text.secondary" sx={{ minWidth: { sm: 120 } }}>
                 {t('concerts.form.ticketPrice')}
               </Typography>

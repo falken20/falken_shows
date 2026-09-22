@@ -343,7 +343,11 @@ export default function ConcertFormPage() {
             />
 
             {/* Submit */}
-            <Stack direction={{ xs: 'column-reverse', sm: 'row' }} spacing={1} justifyContent="flex-end">
+            <Stack
+              direction={{ xs: 'column-reverse', sm: 'row' }}
+              spacing={1}
+              justifyContent="flex-end"
+            >
               <Button
                 onClick={() => {
                   void navigate(isEditing ? `/concerts/${numericId}` : '/concerts')
