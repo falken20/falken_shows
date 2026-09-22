@@ -24,10 +24,21 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          mui: ['@mui/material', '@emotion/react', '@emotion/styled'],
-          query: ['@tanstack/react-query'],
+        manualChunks: id => {
+          if (id.includes('node_modules/@mui/') || id.includes('node_modules/@emotion/')) {
+            return 'mui'
+          }
+          if (id.includes('node_modules/@tanstack/react-query')) {
+            return 'query'
+          }
+          if (
+            id.includes('node_modules/react/') ||
+            id.includes('node_modules/react-dom/') ||
+            id.includes('node_modules/react-router')
+          ) {
+            return 'vendor'
+          }
+          return undefined
         },
       },
     },
