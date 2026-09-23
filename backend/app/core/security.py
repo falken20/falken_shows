@@ -4,19 +4,17 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any
 from uuid import uuid4
 
+import bcrypt
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
-from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.db.session import get_db
 from app.models.auth import RevokedToken
-
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
 
@@ -25,12 +23,15 @@ _JWT_ALGORITHM = "HS256"
 
 def hash_password(plain: str) -> str:
     """Return the bcrypt hash of *plain*."""
-    return str(_pwd_context.hash(plain))
+    return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
     """Return ``True`` if *plain* matches *hashed*."""
-    return bool(_pwd_context.verify(plain, hashed))
+    try:
+        return bool(bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8")))
+    except ValueError:
+        return False
 
 
 def create_access_token(
