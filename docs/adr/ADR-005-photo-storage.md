@@ -2,7 +2,7 @@
 
 ## Title: Photo storage strategy
 
-**Status**: Accepted  
+**Status**: Proposed
 **Date**: 2026-07-15  
 **Context**: Live Memories
 
@@ -10,7 +10,7 @@
 
 ## Context
 
-The application needs to store user-uploaded photos (concert photos, artist photos, ticket photos). The options were:
+The application may need to store user-uploaded photos (concert photos, artist photos, ticket photos). The options were:
 
 - **Local filesystem** (development)
 - **Google Cloud Storage** (production)
@@ -18,7 +18,8 @@ The application needs to store user-uploaded photos (concert photos, artist phot
 
 ## Decision
 
-Use the **local filesystem** for development and **Google Cloud Storage (GCS)** for production. The storage backend is selected via the `STORAGE_BACKEND` environment variable.
+When photo uploads are implemented, use the **local filesystem** for development and **Google Cloud Storage (GCS)** for
+production. The planned storage backend is selected via the `STORAGE_BACKEND` environment variable.
 
 ## Rationale
 
@@ -37,9 +38,9 @@ Database blob storage was rejected due to performance and scalability concerns.
 - Filenames stored in GCS use UUID-based keys, not user-supplied filenames.
 - Signed URLs expire after a configurable duration (default: 1 hour).
 
-## Consequences
+## Planned consequences
 
-- `STORAGE_BACKEND=local` serves files as static assets from `./data/uploads/`.
-- `STORAGE_BACKEND=gcs` uploads to a private GCS bucket and returns signed URLs.
-- No code changes required to switch between backends.
+- `STORAGE_BACKEND=local` will serve files from `./data/uploads/`.
+- `STORAGE_BACKEND=gcs` will upload to a private GCS bucket and return signed URLs.
+- The implementation must provide upload endpoints and security tests before this ADR is accepted.
 - Production Cloud Run service account needs `storage.objects.create` and `storage.objects.get` on the bucket.

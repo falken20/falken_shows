@@ -10,8 +10,8 @@ Live Memories is a full-stack web application for cataloguing personal concert e
 
 ```
 live-memories/
-├── backend/    # Python 3.12 + FastAPI + SQLAlchemy 2 + Alembic
-├── frontend/   # React 18 + TypeScript + Vite + Material UI
+├── backend/    # Python 3.11+ + FastAPI + SQLAlchemy 2 + Alembic
+├── frontend/   # React 19 + TypeScript + Vite + Material UI
 ├── infrastructure/  # Cloud Build
 └── docs/       # ADRs and architecture docs
 ```
@@ -20,7 +20,7 @@ live-memories/
 
 ## Python conventions (backend)
 
-- Python 3.12+. Use modern syntax: `X | None`, `match`, `TypeAlias`.
+- Python 3.11+. Use modern syntax: `X | None`, `match`, `TypeAlias`.
 - Use **async/await** for all database access and I/O.
 - Follow the layered architecture strictly:
   - `app/api/v1/endpoints/` – FastAPI routers, only input/output handling
@@ -70,11 +70,11 @@ Never return raw exceptions or unformatted error strings.
 
 ## TypeScript conventions (frontend)
 
-- React 18 with functional components only. No class components.
+- React 19 with functional components only. No class components.
 - TypeScript strict mode. No `any` unless justified with a comment.
 - Use **TanStack Query** for all server state. Never use raw `fetch` in components.
 - Use **React Hook Form + Zod** for all forms.
-- Use **React Router v6** with typed `useParams` and `useNavigate`.
+- Use **React Router v7** with typed `useParams` and `useNavigate`.
 - Use **Material UI** components. Extend with `sx` prop or `styled()`.
 - Export one component per file. File name = component name (PascalCase).
 - Hooks go in `src/hooks/`. API clients in `src/api/`. Types in `src/types/`.

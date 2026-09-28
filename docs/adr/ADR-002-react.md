@@ -18,7 +18,7 @@ A frontend framework is needed for the single-page application. The main candida
 
 ## Decision
 
-Use **React 18** with **Vite** as the frontend stack.
+Use **React** with **Vite** as the frontend stack. The current implementation uses React 19 and React Router 7.
 
 ## Rationale
 

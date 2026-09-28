@@ -41,7 +41,7 @@ applyTo: "frontend/**/*.{ts,tsx}"
 
 ## Routing
 
-- Use **React Router v6**.
+- Use **React Router v7**.
 - Type route params: `useParams<{ concertId: string }>()`.
 - Use `useNavigate` for programmatic navigation.
 

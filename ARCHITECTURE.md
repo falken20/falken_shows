@@ -8,7 +8,7 @@ Live Memories is a full-stack web application structured as a monorepo. It consi
 ┌─────────────────────────────────────────────────────────┐
 │                        Browser                          │
 │                                                         │
-│  React 18 + Vite + TypeScript + Material UI             │
+│  React 19 + Vite + TypeScript + Material UI             │
 │  TanStack Query │ React Hook Form │ i18next             │
 └─────────────────────────┬───────────────────────────────┘
                            │ HTTP/JSON
@@ -86,24 +86,25 @@ All server state goes through **TanStack Query**. API calls are defined in `src/
 
 ## Security architecture
 
-- **Authentication**: JWT tokens issued by the backend, stored in `httpOnly` cookies or `localStorage` (configurable).
+- **Authentication**: JWT tokens issued by the backend and stored in browser `sessionStorage`.
 - **Authorisation**: Protected endpoints require `get_current_user` dependency.
-- **Passwords**: Bcrypt hashing via `passlib`.
+- **Passwords**: Bcrypt hashing via the `bcrypt` package.
 - **CORS**: Explicit allowed origins list; never `*` in production.
-- **File uploads**: MIME type validation with Pillow, UUID-based storage keys.
+- **File uploads**: Planned; no upload endpoint is currently implemented.
 - **Headers**: Security headers applied via FastAPI middleware.
 - **Secrets**: Google Secret Manager in production; `.env` locally (never committed).
 
 ---
 
-## Image storage
+## Image storage (planned)
 
 | Environment | Backend | Access |
 |---|---|---|
-| Local/Dev | Local filesystem | Static file serving |
-| Production | Google Cloud Storage | Signed URLs (1h expiry) |
+| Local/Dev | Reserved configuration only | Not implemented |
+| Production | Reserved GCS configuration | Not implemented |
 
-The backend selects the storage implementation via `STORAGE_BACKEND` env var.
+The backend reserves `STORAGE_BACKEND` and `GCS_BUCKET_NAME` for a future implementation. They do not currently provide
+file upload or signed URL functionality.
 
 ---
 

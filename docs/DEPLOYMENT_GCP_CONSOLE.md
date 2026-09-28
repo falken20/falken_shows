@@ -118,6 +118,11 @@ En **Cloud Build > Triggers** crea un trigger para la rama `master` apuntando a
 - `_REPO`: `live-memories`.
 - `_BACKEND_URL`: URL real del servicio backend.
 
+Cloud Build construye y publica las imágenes, actualiza y ejecuta el Job de migraciones y despliega nuevas revisiones.
+La configuración inicial de cuentas de servicio, secretos, variables de entorno, conexión con Cloud SQL, IAM y acceso
+de los servicios debe completarse previamente en Cloud Run y Secret Manager; no se debe asumir que el pipeline crea esa
+configuración por sí solo.
+
 La cuenta de servicio de Cloud Build necesita permisos para publicar en Artifact Registry, actualizar y ejecutar el Job de
 migraciones y desplegar ambos servicios de Cloud Run.
 

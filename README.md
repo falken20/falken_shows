@@ -2,6 +2,9 @@
 
 > Aplicación web personal para inventariar y recordar todos los conciertos en directo a los que has asistido a lo largo de tu vida.
 
+Consulta el [índice de documentación](docs/INDEX.md) para encontrar rápidamente las guías de desarrollo, seguridad,
+API, despliegue y arquitectura.
+
 <!-- TODO: Replace with real screenshots -->
 <!-- ![Live Memories Dashboard](docs/screenshots/placeholder-dashboard.png) -->
 
@@ -10,18 +13,16 @@
 ## Características
 
 - 🎤 **Registro completo** de conciertos: fecha, artista, sala, ciudad, precio, valoración, notas personales
-- 🖼 **Galería de fotografías** por concierto (entrada, artista, foto del concierto)
-- 📊 **Estadísticas y visualizaciones**: conciertos por año, artistas más vistos, mapa de ubicaciones, línea temporal
-- 🔍 **Búsqueda, filtros y ordenación** avanzados
-- 📅 **Vista en calendario, tarjetas, tabla y cronología**
-- 🎵 **Artistas y recintos**: gestión independiente con estadísticas calculadas automáticamente
-- 📤 **Importación y exportación** a JSON y CSV
+- 🎵 **Artistas y recintos**: gestión independiente
 - 🌙 **Modo oscuro / claro**
 - 🌍 **Multiidioma** (Español / Inglés)
 - ♿ **Accesible** – WCAG 2.1 AA
-- 🔒 **Autenticación JWT** – preparada para múltiples usuarios
+- 🔒 **Autenticación JWT** para el usuario administrador
 - 🐳 **Docker Compose** para arrancar todo localmente con un solo comando
-- ☁️ **Preparado para Google Cloud Platform**: Cloud Run, Cloud SQL, Cloud Storage, Secret Manager, Cloud Build
+- ☁️ **Preparado para Google Cloud Platform**: Cloud Run, Cloud SQL, Secret Manager, Artifact Registry y Cloud Build
+
+Las fotografías, estadísticas, búsqueda avanzada, vistas alternativas e importación/exportación están planificadas,
+pero no forman parte todavía de la API implementada.
 
 ---
 
@@ -29,8 +30,8 @@
 
 | Capa | Tecnología |
 |---|---|
-| Frontend | React 18, TypeScript, Vite, React Router v6, TanStack Query, React Hook Form, Zod, Material UI |
-| Backend | Python 3.12, FastAPI, SQLAlchemy 2 (async), Alembic, Pydantic 2, Uvicorn |
+| Frontend | React 19, TypeScript, Vite, React Router v7, TanStack Query, React Hook Form, Zod, Material UI |
+| Backend | Python 3.11+, FastAPI, SQLAlchemy 2 (async), Alembic, Pydantic 2, Uvicorn |
 | Base de datos | SQLite (desarrollo) / PostgreSQL (producción) |
 | Testing BE | Pytest, pytest-cov, HTTPX, Faker |
 | Testing FE | Vitest, React Testing Library, MSW, Playwright |
@@ -270,30 +271,21 @@ GET    /api/v1/artists            Listado de artistas
 POST   /api/v1/artists            Crear artista
 GET    /api/v1/venues             Listado de recintos
 POST   /api/v1/venues             Crear recinto
-POST   /api/v1/uploads            Subir imagen
-GET    /api/v1/statistics/summary Estadísticas generales
 ```
 
 ---
 
 ## Gestión de imágenes
 
-**Desarrollo (local)**: Las imágenes se almacenan en `./data/uploads/` y se sirven como archivos estáticos.
-
-**Producción (GCS)**: Se usan URLs firmadas con expiración configurable. Las imágenes originales se procesan con Pillow: validación de tipo, generación de miniaturas.
+La gestión de imágenes está reservada en la configuración (`STORAGE_BACKEND`, `GCS_BUCKET_NAME`), pero todavía no existe
+un endpoint de subida ni un servicio de almacenamiento implementado. No debe considerarse una funcionalidad disponible.
 
 ---
 
-## Importación y exportación
+## Funcionalidades planificadas
 
-```bash
-GET  /api/v1/concerts/export?format=json   # Exportar a JSON
-GET  /api/v1/concerts/export?format=csv    # Exportar a CSV
-POST /api/v1/concerts/import/preview       # Previsualizar importación
-POST /api/v1/concerts/import/confirm       # Confirmar importación
-```
-
-Plantillas de ejemplo en `scripts/templates/`.
+Importación/exportación, fotografías, estadísticas, búsqueda avanzada y vistas alternativas quedan fuera del alcance
+actual. Cuando se implementen deberán añadirse sus endpoints, validaciones, pruebas y documentación de API.
 
 ---
 

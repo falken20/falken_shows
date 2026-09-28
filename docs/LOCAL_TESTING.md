@@ -7,7 +7,7 @@ Este documento explica como levantar y validar la aplicacion en local.
 - macOS o Linux
 - Python 3.11+
 - uv instalado
-- Node.js 20+ y npm
+- Node.js 24+ y npm
 - Docker + Docker Compose (opcional)
 
 Comprobacion rapida:

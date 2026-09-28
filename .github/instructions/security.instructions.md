@@ -20,7 +20,7 @@ applyTo: "**/*.{py,ts,tsx}"
 ## Authentication and authorisation
 
 - Use JWT tokens with short expiry (`ACCESS_TOKEN_EXPIRE_MINUTES`).
-- Hash passwords with **bcrypt** (via `passlib`). Never store plaintext passwords.
+- Hash passwords with the **bcrypt** package. Never store plaintext passwords.
 - Protected endpoints must require the `get_current_user` dependency.
 - Return `401 Unauthorized` for missing/invalid auth; `403 Forbidden` for insufficient permissions.
 

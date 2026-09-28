@@ -60,6 +60,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `useHealth.ts`, `useThemeMode.tsx`, `theme.ts`, `i18n/index.ts`,
   `test/utils.tsx`, MSW `handlers.ts`, `server.ts`, `browser.ts`.
 
+### Changed (documentation)
+- Aligned README, architecture documents, ADRs, security guidance and troubleshooting with the current React 19,
+  React Router 7, Python 3.11+ and direct bcrypt implementation.
+- Marked photo storage, uploads, statistics, search extensions and import/export as planned until their API and services
+  are implemented.
+
 ---
 
 ## [0.1.0] - 2026-07-15

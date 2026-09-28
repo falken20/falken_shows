@@ -57,7 +57,8 @@ Only the latest version receives security updates.
 - All concert/artist/venue endpoints require a valid access token.
 - Strict Pydantic input validation on all endpoints.
 - CORS restricted to configured origins; wildcard origins are rejected.
-- File upload validation is required before any upload endpoint is added (MIME via Pillow, size limit, UUID filenames, storage outside the web root).
+- File uploads are not currently implemented. Before adding an upload endpoint, require MIME validation via Pillow, a size limit,
+  UUID filenames, and storage outside the web root.
 - Security headers (HSTS in staging/production, X-Frame-Options, X-Content-Type-Options, CSP, Cache-Control: no-store).
 - Log redaction for password/token-like values.
 - Audit log lines for create, update, and delete (`action`, `resource`, `id`, `actor`).

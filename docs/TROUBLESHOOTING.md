@@ -103,17 +103,6 @@ async def test_example(async_client: AsyncClient, db_session: AsyncSession) -> N
 
 ---
 
-### Passlib deprecation warning (`crypt` module)
-
-**Symptom:**
-```
-DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
-```
-
-**Cause:** `passlib[bcrypt]` uses Python's `crypt` module on some platforms. This is a known upstream issue. It does not affect functionality.
-
-**Workaround:** Suppress the warning in `pyproject.toml` or upgrade to `passlib>=1.7.5` when available.
-
 ---
 
 ## Frontend

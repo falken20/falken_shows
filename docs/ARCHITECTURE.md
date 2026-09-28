@@ -1,5 +1,8 @@
 # Architecture
 
+> The GCS and photo-storage elements shown below describe the target architecture. Photo uploads and signed URLs are not
+> implemented in the current release.
+
 Live Memories is a full-stack app for cataloguing personal concert history: a **FastAPI** backend, a **React + TypeScript** frontend, and **Google Cloud Platform** infrastructure configured through the GCP Console.
 
 

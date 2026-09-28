@@ -16,7 +16,7 @@ applyTo: "backend/**/*.py"
 
 ## Python style
 
-- Python 3.12+ syntax: `X | None`, `match/case`, modern generics `list[str]`, `dict[str, int]`.
+- Python 3.11+ syntax: `X | None`, `match/case`, modern generics `list[str]`, `dict[str, int]`.
 - All functions and methods require type annotations (enforced by Mypy strict).
 - Line length: 120 characters (Ruff).
 - No `# type: ignore` without an explanatory comment on the same line.
