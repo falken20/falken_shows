@@ -67,7 +67,6 @@ class Settings(BaseSettings):
 
     # ── CORS ───────────────────────────────────────────────────
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:4173"]
-    TRUST_PROXY_HEADERS: bool = False
 
     # ── Localisation ───────────────────────────────────────────
     DEFAULT_LANGUAGE: str = "es"

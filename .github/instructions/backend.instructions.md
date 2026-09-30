@@ -9,10 +9,15 @@ applyTo: "backend/**/*.py"
 - Follow the strict layered architecture:
   - `app/api/v1/endpoints/` – FastAPI routers: validation in, response out. No business logic.
   - `app/services/` – Business logic. No direct DB access (use repositories).
-  - `app/repositories/` – All SQLAlchemy queries. No business logic.
+  - `app/repositories/` – All SQLAlchemy queries. No business logic. Repositories should return `None` on not-found; services are responsible for raising `AppError(ErrorCode.X_NOT_FOUND)`.
   - `app/models/` – SQLAlchemy ORM models only.
-  - `app/schemas/` – Pydantic 2 models for request/response.
+  - `app/schemas/` – Pydantic 2 models for request/response. Name schemas as `<Entity>Create`, `<Entity>Update`, `<Entity>Response`.
   - `app/core/` – Config, security, logging, exceptions.
+
+## Migrations
+
+- Use Alembic for all schema changes.
+- Never modify the database schema manually.
 
 ## Python style
 
@@ -27,7 +32,7 @@ applyTo: "backend/**/*.py"
 - Always use async sessions: `AsyncSession`.
 - Never use `SELECT *` – always list columns explicitly.
 - Avoid N+1 queries: use `selectinload` or `joinedload` where appropriate.
-- Use `text()` for raw SQL only when unavoidable; parameterise all values.
+- Use `text()` for raw SQL only for complex aggregations or window functions not supported by SQLAlchemy Core/ORM; parameterise all values.
 
 ## Error handling
 

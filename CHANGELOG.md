@@ -49,6 +49,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   mutable version tags (supply-chain hardening).
 - **LOW** – SECURITY.md vulnerability disclosure contact updated from placeholder
   to `security@livememories.app`.
+- **LOW** – Removed unused `TRUST_PROXY_HEADERS` setting from `Settings`; it was
+  never read by `get_client_ip` and gave a false impression that proxy trust was
+  configurable there. The real trust boundary is uvicorn's `--forwarded-allow-ips`
+  flag (already used in the backend `Dockerfile`), documented via the new
+  `FORWARDED_ALLOW_IPS` entry in `.env.example`.
+
+### Fixed
+- Frontend `package.json`: moved `eslint-plugin-react-refresh` and
+  `typescript-eslint` from `dependencies` to `devDependencies` (they are only
+  used by `eslint.config.js` and were never part of the runtime bundle).
+- Added an `engines.node` constraint (`>=20.19.0`) to the frontend
+  `package.json` so `npm install`/`vitest` fail with a clear message instead of
+  a confusing `styleText` import error on older Node runtimes.
 
 ### Added (documentation)
 - Google-style docstrings added to all public backend modules:
